@@ -1,0 +1,29 @@
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFjY2VzcyJ9.eyJpYXQiOjE2NjYyNTc2MDIsImV4cCI6MTY2NjM0NDAwMiwiYXVkIjoiaHR0cHM6Ly95b3VyZG9tYWluLmNvbSIsImlzcyI6ImZlYXRoZXJzIiwic3ViIjoiMSIsImp0aSI6IjJhMTk5MGE0LWM3ZjMtNDE2NS04NWI4LTQ1YWRhMzQ4YjVmNCJ9.ytZkn-yT9wG_tKiU_SkvLQPVfPwI7Ccq1197KCbSTNI",
+  "authentication": {
+    "strategy": "local",
+    "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6ImFjY2VzcyJ9.eyJpYXQiOjE2NjYyNTc2MDIsImV4cCI6MTY2NjM0NDAwMiwiYXVkIjoiaHR0cHM6Ly95b3VyZG9tYWluLmNvbSIsImlzcyI6ImZlYXRoZXJzIiwic3ViIjoiMSIsImp0aSI6IjJhMTk5MGE0LWM3ZjMtNDE2NS04NWI4LTQ1YWRhMzQ4YjVmNCJ9.ytZkn-yT9wG_tKiU_SkvLQPVfPwI7Ccq1197KCbSTNI",
+    "payload": {
+      "iat": 1666257602,
+      "exp": 1666344002,
+      "aud": "https:\/\/yourdomain.com",
+      "iss": "feathers",
+      "sub": "1",
+      "jti": "2a1990a4-c7f3-4165-85b8-45ada348b5f4"
+    }
+  },
+  "user": {
+    "id": 1,
+    "uuid": "e8f66942-3d40-4714-9379-9a974f86c1f9",
+    "email": "ilja.ragnar@gmail.com",
+    "fullName": "Ilja",
+    "avatarURI": null,
+    "preferredLanguage": "true",
+    "prefersDarkMode": true,
+    "prefersMiniDrawer": true,
+    "googleId": null,
+    "githubId": null,
+    "createdAt": "2021-09-14T19:05:58.989Z",
+    "updatedAt": "2022-10-19T12:13:47.559Z"
+  }
+}

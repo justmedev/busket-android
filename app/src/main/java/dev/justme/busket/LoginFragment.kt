@@ -1,20 +1,20 @@
 package dev.justme.busket
 
-import android.app.AlertDialog
 import android.content.Context
-import android.content.DialogInterface
 import android.os.Bundle
 import android.text.Editable
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.widget.doAfterTextChanged
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import dev.justme.busket.databinding.FragmentLoginBinding
 import dev.justme.busket.feathers.Feathers
+
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -30,16 +30,26 @@ class LoginFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         _binding = FragmentLoginBinding.inflate(inflater, container, false)
         return binding.root
+    }
+
+    override fun onResume() {
+        super.onResume()
+        (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(false)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         binding.loginEmailInput.doAfterTextChanged {
-            if (it != null) validateInput(it, null);
+            if (it != null) validateInput(it, null)
         }
 
         binding.loginRegisterButton.setOnClickListener {
@@ -53,8 +63,7 @@ class LoginFragment : Fragment() {
                 binding.loginRegisterButton.isEnabled = false
                 binding.loginLoginButton.isEnabled = false
 
-                val feathers = Feathers(context as Context)
-                feathers.authenticate(
+                Feathers.getInstance(context as Context).authenticate(
                     binding.loginEmailInput.text.toString(),
                     binding.loginPasswordInput.text.toString(),
                     {
@@ -78,19 +87,19 @@ class LoginFragment : Fragment() {
     }
 
     private fun validateInput(email: Editable?, password: Editable?): Boolean {
-        var passed = true;
+        var passed = true
 
         if (email != null && !email.contains("@")) {
-            passed = false;
-            binding.loginEmailInput.error = "Input has to be an email!";
-        } else binding.loginEmailInput.error = null;
+            passed = false
+            binding.loginEmailInput.error = "Input has to be an email!"
+        } else binding.loginEmailInput.error = null
 
         if (password != null && password.length < 3) {
-            passed = false;
-            binding.loginPasswordInput.error = "Password has to be at least 3 chars long!";
+            passed = false
+            binding.loginPasswordInput.error = "Password has to be at least 3 chars long!"
         }
 
-        return passed;
+        return passed
     }
 
     override fun onDestroyView() {

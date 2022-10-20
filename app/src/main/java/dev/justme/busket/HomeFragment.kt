@@ -28,8 +28,9 @@ class HomeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         feathers = Feathers.getInstance(context as Context)
-
         if (feathers?.user == null) {
+            binding.homeProgressbar.visibility = View.VISIBLE
+            binding.homeProgressText.visibility = View.VISIBLE
             feathers?.tryAuthenticateWithAccessToken({
                 binding.homeProgressbar.visibility = View.GONE
                 binding.homeProgressText.visibility = View.GONE
@@ -37,12 +38,7 @@ class HomeFragment : Fragment() {
                 Log.d("Busket", it.toString())
                 findNavController().navigate(R.id.action_HomeFragment_to_LoginFragment)
             })
-
-            return
         }
-
-        binding.homeProgressbar.visibility = View.GONE
-        binding.homeProgressText.visibility = View.GONE
     }
 
     override fun onDestroy() {

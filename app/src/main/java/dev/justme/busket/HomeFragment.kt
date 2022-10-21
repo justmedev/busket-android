@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.Feathers
 
@@ -29,16 +30,23 @@ class HomeFragment : Fragment() {
 
         feathers = Feathers.getInstance(context as Context)
         if (feathers?.user == null) {
+            binding.homeMainContentContainer.visibility = View.GONE
             binding.homeProgressbar.visibility = View.VISIBLE
             binding.homeProgressText.visibility = View.VISIBLE
             feathers?.tryAuthenticateWithAccessToken({
                 binding.homeProgressbar.visibility = View.GONE
                 binding.homeProgressText.visibility = View.GONE
+                binding.homeMainContentContainer.visibility = View.VISIBLE
             }, {
                 Log.d("Busket", it.toString())
                 findNavController().navigate(R.id.action_HomeFragment_to_LoginFragment)
             })
         }
+
+        val list = arrayOf(ListOverview("Title", "Sub") { Log.d("Busket", "clicked sub") }, ListOverview("t", "s") { Log.d("Busket", "clicked s") })
+        val recyclerView: RecyclerView = binding.homeListOverviewRecyclerview
+
+        recyclerView.adapter = ListOverviewAdapter(list)
     }
 
     override fun onDestroy() {

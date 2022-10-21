@@ -11,6 +11,7 @@
     <string name="name">Name</string>
     <string name="email">Email</string>
     <string name="register">Register</string>
+    <string name="welcome">Hello %1$s!</string>
 
     <string name="add_shopping_list_item">Add shopping list item</string>
     <!-- TODO: Remove or change this placeholder text -->

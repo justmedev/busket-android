@@ -48,6 +48,9 @@ class HomeFragment : Fragment() {
             ListOverview("Title", "Sub") { Log.d("Busket", "clicked sub") },
             ListOverview("t", "s") { Log.d("Busket", "clicked s") })
         binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(list)
+
+        // TODO: Get lists from backend and populate recyclerview with real data
+        feathers?.service("test")?.create("")
     }
 
     override fun onDestroy() {

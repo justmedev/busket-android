@@ -29,6 +29,61 @@ class Feathers(private val context: Context) {
 
     companion object : SingletonHolder<Feathers, Context>(::Feathers)
 
+    class Service(service: String, gson: Gson) {
+        private val service = service
+        private val gson = gson
+
+        fun find(data: String) {
+
+        }
+
+        fun get(data: String) {
+
+        }
+
+        fun <T> create(data: T) {
+            gson.toJson(data)
+
+        }
+
+        fun update(data: String) {
+
+        }
+
+        fun patch(data: String) {
+
+        }
+
+        fun remove(data: String) {
+
+        }
+
+        private fun <T> makeHttpRequest(method: Int, body: Class<T>? = null): T {
+            val url = "https://busket-beta.bux.at/$service"
+            val data = if (body == null) null else JSONObject(gson.toJson(body))
+
+            val stringRequest = JsonObjectRequest(
+                method, url, data,
+                {
+                    gson.fromJson(
+                        it.toString(),
+                        Class<T>::class.java
+                    )
+                    if (storeTokenAndUser) storeAccessTokenAndSetUser(auth)
+                    successCallback?.invoke(auth)
+                },
+                {
+                    errorCallback?.invoke(it)
+                })
+
+            requestQueue.add(stringRequest)
+        }
+    }
+
+    fun service(service: String): Service {
+        return Service(service, gson)
+    }
+
     fun authenticate(
         email: String,
         password: String,

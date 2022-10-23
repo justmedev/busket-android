@@ -11,6 +11,10 @@ import androidx.navigation.fragment.findNavController
 import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.Feathers
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
+import dev.justme.busket.feathers.responses.ShoppingList
+import dev.justme.busket.feathers.responses.ShoppingListResponse
+import java.util.UUID
+
 
 class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
@@ -50,7 +54,21 @@ class HomeFragment : Fragment() {
         binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(list)
 
         // TODO: Get lists from backend and populate recyclerview with real data
-        feathers?.service("test")?.create("")
+        /*val shoppingList = ShoppingList(
+            UUID.randomUUID().toString(),
+            "Test-list-android",
+            "android test shopping list",
+            feathers?.user?.uuid ?: "UNKNOWN",
+            listOf()
+        )
+        feathers?.service("list")?.create(
+            shoppingList,
+            ShoppingListResponse::class.java,
+            {
+                Log.d("Busket sl name", it.name)
+            },
+            {
+                Log.d("Busket", it.networkResponse.data.toString()) })*/
     }
 
     override fun onDestroy() {

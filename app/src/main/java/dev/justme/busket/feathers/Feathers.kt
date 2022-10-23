@@ -1,6 +1,7 @@
 package dev.justme.busket.feathers
 
 import android.content.Context
+import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.android.volley.AuthFailureError
@@ -10,78 +11,156 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.*
 import com.google.gson.Gson
 import dev.justme.busket.SingletonHolder
+import dev.justme.busket.feathers.responses.Authentication
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
+import dev.justme.busket.feathers.responses.ShoppingListResponse
 import dev.justme.busket.feathers.responses.User
 import org.json.JSONObject
+import kotlin.reflect.KClass
 
 class Feathers(private val context: Context) {
+    private val gson = Gson()
+    private val mainKey = MasterKey.Builder(context)
+        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+        .build()
+    var user: User? = null
     private val cache = DiskBasedCache(context.cacheDir, 1024 * 1024) // 1MB cap
     private val network = BasicNetwork(HurlStack())
     private val requestQueue = RequestQueue(cache, network).apply {
         start()
     }
-    private val gson = Gson()
-    private val mainKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
-
-    var user: User? = null
+    private var authentication: AuthenticationSuccessResponse? = null
 
     companion object : SingletonHolder<Feathers, Context>(::Feathers)
 
-    class Service(service: String, gson: Gson) {
-        private val service = service
-        private val gson = gson
-
-        fun find(data: String) {
-
+    class Service(
+        private val service: String,
+        private val gson: Gson,
+        private val context: Context,
+        private val requestQueue: RequestQueue,
+        private val authentication: AuthenticationSuccessResponse? = null,
+    ) {
+        fun <T : Any, R : Any> find(
+            body: T,
+            responseClass: Class<R>,
+            successCallback: ((R) -> Unit)?,
+            errorCallback: ((e: VolleyError) -> Unit)?
+        ) {
+            makeHttpRequest(
+                Request.Method.GET,
+                body,
+                responseClass,
+                { successCallback?.invoke(it) },
+                { errorCallback?.invoke(it) })
         }
 
-        fun get(data: String) {
-
+        fun <T : Any, R : Any> get(
+            body: T,
+            responseClass: Class<R>,
+            successCallback: ((R) -> Unit)?,
+            errorCallback: ((e: VolleyError) -> Unit)?
+        ) {
+            makeHttpRequest(
+                Request.Method.GET,
+                body,
+                responseClass,
+                { successCallback?.invoke(it) },
+                { errorCallback?.invoke(it) })
         }
 
-        fun <T> create(data: T) {
-            gson.toJson(data)
-
+        fun <T : Any, R : Any> create(
+            body: T,
+            responseClass: Class<R>,
+            successCallback: ((R) -> Unit)?,
+            errorCallback: ((e: VolleyError) -> Unit)?
+        ) {
+            makeHttpRequest(
+                Request.Method.POST,
+                body,
+                responseClass,
+                { successCallback?.invoke(it) },
+                { errorCallback?.invoke(it) })
         }
 
-        fun update(data: String) {
-
+        fun <T : Any, R : Any> update(
+            body: T,
+            responseClass: Class<R>,
+            successCallback: ((R) -> Unit)?,
+            errorCallback: ((e: VolleyError) -> Unit)?
+        ) {
+            makeHttpRequest(
+                Request.Method.PUT,
+                body,
+                responseClass,
+                { successCallback?.invoke(it) },
+                { errorCallback?.invoke(it) })
         }
 
-        fun patch(data: String) {
-
+        fun <T : Any, R : Any> patch(
+            body: T,
+            responseClass: Class<R>,
+            successCallback: ((R) -> Unit)?,
+            errorCallback: ((e: VolleyError) -> Unit)?
+        ) {
+            makeHttpRequest(
+                Request.Method.PATCH,
+                body,
+                responseClass,
+                { successCallback?.invoke(it) },
+                { errorCallback?.invoke(it) })
         }
 
-        fun remove(data: String) {
-
+        fun <T : Any, R : Any> remove(
+            body: T,
+            responseClass: Class<R>,
+            successCallback: ((R) -> Unit)?,
+            errorCallback: ((e: VolleyError) -> Unit)?
+        ) {
+            makeHttpRequest(
+                Request.Method.DELETE,
+                body,
+                responseClass,
+                { successCallback?.invoke(it) },
+                { errorCallback?.invoke(it) })
         }
 
-        private fun <T> makeHttpRequest(method: Int, body: Class<T>? = null): T {
+        private fun <T : Any, R : Any> makeHttpRequest(
+            method: Int,
+            body: T? = null,
+            responseClass: Class<R>,
+            successCallback: (R) -> Unit,
+            errorCallback: (VolleyError) -> Unit
+        ) {
             val url = "https://busket-beta.bux.at/$service"
             val data = if (body == null) null else JSONObject(gson.toJson(body))
+            Log.d("Busket data", data.toString())
 
-            val stringRequest = JsonObjectRequest(
+            val stringRequest = object : JsonObjectRequest(
                 method, url, data,
                 {
-                    gson.fromJson(
+                    val res = gson.fromJson(
                         it.toString(),
-                        Class<T>::class.java
+                        responseClass
                     )
-                    if (storeTokenAndUser) storeAccessTokenAndSetUser(auth)
-                    successCallback?.invoke(auth)
+                    successCallback.invoke(res)
                 },
                 {
-                    errorCallback?.invoke(it)
-                })
-
+                    errorCallback.invoke(it)
+                }) {
+                @Throws(AuthFailureError::class)
+                override fun getHeaders(): Map<String, String> {
+                    val headers = HashMap<String, String>()
+                    if (authentication != null) headers["Authorization"] =
+                        authentication.accessToken
+                    return headers
+                }
+            }
             requestQueue.add(stringRequest)
         }
     }
 
     fun service(service: String): Service {
-        return Service(service, gson)
+        return Service(service, gson, context, requestQueue, authentication)
     }
 
     fun authenticate(
@@ -182,6 +261,11 @@ class Feathers(private val context: Context) {
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         ).edit().putString("access_token", auth.accessToken).apply()
 
+        authentication = auth
         user = auth.user
+    }
+
+    fun getAuthentication(): AuthenticationSuccessResponse? {
+        return authentication
     }
 }

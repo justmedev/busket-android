@@ -11,15 +11,12 @@ import com.android.volley.VolleyError
 import com.android.volley.toolbox.*
 import com.google.gson.Gson
 import dev.justme.busket.SingletonHolder
-import dev.justme.busket.feathers.responses.Authentication
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
-import dev.justme.busket.feathers.responses.ShoppingListResponse
 import dev.justme.busket.feathers.responses.User
 import org.json.JSONObject
-import kotlin.reflect.KClass
 
-class Feathers(private val context: Context) {
-    private val gson = Gson()
+class FeathersHttp(private val context: Context) {
+    val gson = Gson()
     private val mainKey = MasterKey.Builder(context)
         .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
         .build()
@@ -31,7 +28,7 @@ class Feathers(private val context: Context) {
     }
     private var authentication: AuthenticationSuccessResponse? = null
 
-    companion object : SingletonHolder<Feathers, Context>(::Feathers)
+    companion object : SingletonHolder<FeathersHttp, Context>(::FeathersHttp)
 
     class Service(
         private val service: String,

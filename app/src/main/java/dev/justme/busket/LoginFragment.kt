@@ -1,7 +1,8 @@
 package dev.justme.busket
 
-import android.content.Context
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,7 +14,7 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
 import dev.justme.busket.databinding.FragmentLoginBinding
-import dev.justme.busket.feathers.Feathers
+import dev.justme.busket.feathers.FeathersSocket
 
 
 /**
@@ -62,24 +63,28 @@ class LoginFragment : Fragment() {
 
                 binding.loginRegisterButton.isEnabled = false
                 binding.loginLoginButton.isEnabled = false
+                val handler = Handler(Looper.getMainLooper())
 
-                Feathers.getInstance(context as Context).authenticate(
+                FeathersSocket.getInstance(requireContext()).authenticate(
                     binding.loginEmailInput.text.toString(),
                     binding.loginPasswordInput.text.toString(),
                     {
                         findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
                     },
                     {
-                        binding.loginRegisterButton.isEnabled = true
-                        binding.loginLoginButton.isEnabled = true
+                        handler.post {
+                            binding.loginRegisterButton.isEnabled = true
+                            binding.loginLoginButton.isEnabled = true
+                        }
 
-                        if (it.networkResponse.statusCode == 401) {
-                            Snackbar.make(view, "Wrong email or password!", Snackbar.LENGTH_LONG).show()
+                        if (it.code == 401) {
+                            Snackbar.make(view, "Wrong email or password!", Snackbar.LENGTH_LONG)
+                                .show()
                             return@authenticate
                         }
 
                         Snackbar.make(view, "An error occurred!", Snackbar.LENGTH_LONG).show()
-                        Log.e("Busket VolleyError", it.toString())
+                        Log.e("Busket", it.toString())
                     }
                 )
             }

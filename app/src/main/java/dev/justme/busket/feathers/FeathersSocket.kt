@@ -14,20 +14,36 @@ import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.User
 import org.json.JSONObject
 
-data class SocketError(val name: String, val message: String, val code: Int, val className: String, val errors: JSONObject)
+data class SocketError(
+    val name: String,
+    val message: String,
+    val code: Int,
+    val className: String,
+
+    val data: Any?,
+    val errors: List<Any>?,
+)
 
 class FeathersSocket(private val context: Context) {
+    //region privates
     private val options = IO.Options()
     private val gson = Gson()
-    private val mainKey =
-        MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
+    private val mainKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
     private var authentication: AuthenticationSuccessResponse? = null
+    //endregion
+
+    //region publics
+    companion object : SingletonHolder<FeathersSocket, Context>(::FeathersSocket)
 
     val socket = IO.socket("http://localhost:43005", options)
     var user: User? = null
+    //endregions
 
-    companion object : SingletonHolder<FeathersSocket, Context>(::FeathersSocket)
+    enum class Method {
+        FIND, GET, CREATE, UPDATE, PATCH, REMOVE
+    }
 
+    //region connection
     private fun connect(connectedCallback: (() -> Unit)?) {
         options.path = "/socket.io"
         options.transports = arrayOf(WebSocket.NAME)
@@ -51,17 +67,70 @@ class FeathersSocket(private val context: Context) {
     fun requireConnected(fn: () -> Unit) {
         if (!socket.connected()) connect(fn)
     }
+    //endregion
 
-    fun req(context: Context) {
-        socket.emit("list::find", FeathersHttp.getInstance(context).gson.toJson(object {
-            val owner = FeathersHttp.getInstance(context).user?.uuid
-        }), Ack {
-            for (a in it) {
-                Log.d("WS ACK it", a.toString())
-            }
-        })
+    //region service methods
+    fun packData(data: Any): JSONObject {
+        val gs = gson.toJson(data)
+        return JSONObject(gs)
     }
 
+    fun service(
+        name: String,
+        method: Method,
+        data: JSONObject,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        service(name, method.toString(), data, callback)
+    }
+
+    fun service(
+        name: String,
+        method: String,
+        data: JSONObject,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        requireConnected {
+            socket.emit("%s::%s".format(name, method), data, Ack {
+                var foundResponse = false
+                for (res in it) {
+                    if (res != null) {
+                        foundResponse = true
+
+                        val json = res as JSONObject
+                        if (!json.has("code")) json.put("code", 200);
+
+                        if (json.getInt("code") != 200) {
+                            val errorObj = gson.fromJson(it[0].toString(), SocketError::class.java)
+                            callback.invoke(json, errorObj)
+                            return@Ack
+                        }
+
+                        callback.invoke(json, null)
+                        return@Ack
+                    }
+                }
+
+                if (!foundResponse) {
+                    callback.invoke(
+                        null,
+                        SocketError(
+                            "Unknown error",
+                            "An unknown networking error occurred",
+                            -1,
+                            "",
+                            null,
+                            null
+                        )
+                    )
+                    return@Ack
+                }
+            })
+        }
+    }
+    //endregion
+
+    //region authentication
     fun authenticate(
         email: String,
         password: String,
@@ -95,21 +164,17 @@ class FeathersSocket(private val context: Context) {
             val password = password
         })
 
-        requireConnected {
-            socket.emit("authentication::create", JSONObject(data), Ack {
-                val json = it[0] as JSONObject
-                if (json.getInt("code") != 200) {
-                    errorCallback?.invoke(gson.fromJson(it[0].toString(), SocketError::class.java))
-                    return@Ack
-                }
+        service("authentication", "create", JSONObject(data)) { data, err ->
+            if (err != null) {
+                errorCallback?.invoke(err)
+                return@service
+            }
 
-                Log.d("WS AUTH ACK ack:", it.contentDeepToString())
-                val auth = gson.fromJson(
-                    it.toString(), AuthenticationSuccessResponse::class.java
-                )
-                if (storeTokenAndUser) storeAccessTokenAndSetUser(auth)
-                successCallback?.invoke(auth)
-            })
+            val auth = gson.fromJson(
+                data.toString(), AuthenticationSuccessResponse::class.java
+            )
+            if (storeTokenAndUser) storeAccessTokenAndSetUser(auth)
+            successCallback?.invoke(auth)
         }
     }
 
@@ -129,22 +194,29 @@ class FeathersSocket(private val context: Context) {
         if (storedAccessToken != null) {
             val data = "{\"strategy\":\"jwt\",\"accessToken\":\"$storedAccessToken\"}"
 
-            socket.emit("create", "authentication", data, Ack {
-                val json = it[0] as JSONObject
-                if (json.getInt("code") != 200) {
-                    errorCallback?.invoke(gson.fromJson(it[0].toString(), SocketError::class.java))
-                    return@Ack
+            service("authentication", Method.CREATE, packData(data)) { json, err ->
+                if (err != null) {
+                    errorCallback?.invoke(err)
+                    return@service
                 }
 
-                Log.d("WS AUTH ACK (tryAuthWAT) arr:", it.contentDeepToString())
                 val auth = gson.fromJson(
-                    it.toString(), AuthenticationSuccessResponse::class.java
+                    json.toString(), AuthenticationSuccessResponse::class.java
                 )
                 if (storeTokenAndUser) storeAccessTokenAndSetUser(auth)
                 successCallback?.invoke(auth)
-            })
+            }
         } else {
-            errorCallback?.invoke(SocketError("forbidden", "No accesstoken found in SharedPreferences", 403, "Forbidden", JSONObject()))
+            errorCallback?.invoke(
+                SocketError(
+                    "forbidden",
+                    "No accesstoken found in SharedPreferences",
+                    403,
+                    "Forbidden",
+                    null,
+                    null,
+                )
+            )
         }
     }
 
@@ -164,4 +236,5 @@ class FeathersSocket(private val context: Context) {
     fun getAuthentication(): AuthenticationSuccessResponse? {
         return authentication
     }
+    //endregion
 }

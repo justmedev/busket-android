@@ -69,9 +69,11 @@ class LoginFragment : Fragment() {
                     binding.loginEmailInput.text.toString(),
                     binding.loginPasswordInput.text.toString(),
                     {
+                        Log.d("LoginFragment", "Success [%d]: %s".format(it.user.id, it.user.fullName))
                         findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
                     },
                     {
+                        Log.d("LoginFragment", "Error: SocketError [%d]: %s".format(it.code, it.message))
                         handler.post {
                             binding.loginRegisterButton.isEnabled = true
                             binding.loginLoginButton.isEnabled = true

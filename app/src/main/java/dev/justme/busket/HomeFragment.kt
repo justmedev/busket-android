@@ -46,7 +46,7 @@ class HomeFragment : Fragment() {
         binding.homeWelcome.text = getString(R.string.welcome, feathers?.user?.fullName)
 
         val socket = FeathersSocket.getInstance(requireContext())
-        socket.req(requireContext())
+        // socket.req(requireContext())
 
         val list = arrayOf(
             ListOverview("Title", "Sub") { Log.d("Busket", "clicked sub") },

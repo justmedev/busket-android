@@ -47,7 +47,10 @@ class FeathersSocket(private val context: Context) {
     private fun connect(connectedCallback: (() -> Unit)?) {
         options.path = "/socket.io"
         options.transports = arrayOf(WebSocket.NAME)
-        socket.connect().on(Socket.EVENT_CONNECT) {
+        socket.connect();
+
+        socket.on(Socket.EVENT_CONNECT) {
+            Log.d("Busket Socket", "Socket connected. Invoking callback")
             connectedCallback?.invoke()
         }
         socket.on(Socket.EVENT_DISCONNECT) {
@@ -62,6 +65,17 @@ class FeathersSocket(private val context: Context) {
         socket.on(Socket.EVENT_CONNECT_ERROR) {
             Log.d("Busket Socket", "Socket connection error.")
         }
+        socket.on(Socket.EVENT_CONNECT_TIMEOUT) {
+            Log.d("Busket Socket", "Socket connection timeout error.")
+        }
+
+        socket.on(Socket.EVENT_RECONNECT_FAILED) {
+            Log.d("Busket Socket", "Socket reconnection failed.")
+        }
+
+        socket.on(Socket.EVENT_RECONNECT_ERROR) {
+            Log.d("Busket Socket", "Socket reconnection error.")
+        }
     }
 
     fun requireConnected(fn: () -> Unit) {
@@ -70,11 +84,6 @@ class FeathersSocket(private val context: Context) {
     //endregion
 
     //region service methods
-    fun packData(data: Any): JSONObject {
-        val gs = gson.toJson(data)
-        return JSONObject(gs)
-    }
-
     fun service(
         name: String,
         method: Method,
@@ -91,7 +100,7 @@ class FeathersSocket(private val context: Context) {
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         requireConnected {
-            socket.emit("%s::%s".format(name, method), data, Ack {
+            socket.emit("%s::%s".format(name, method.lowercase()), data, Ack {
                 var foundResponse = false
                 for (res in it) {
                     if (res != null) {
@@ -158,13 +167,12 @@ class FeathersSocket(private val context: Context) {
         errorCallback: ((e: SocketError) -> Unit)? = null,
         storeTokenAndUser: Boolean = true,
     ) {
-        val data = gson.toJson(object {
-            val strategy = "local"
-            val email = email
-            val password = password
-        })
+        val jData = JSONObject();
+        jData.put("strategy", "local")
+        jData.put("email", email)
+        jData.put("password", password)
 
-        service("authentication", "create", JSONObject(data)) { data, err ->
+        service("authentication", "create", jData) { data, err ->
             if (err != null) {
                 errorCallback?.invoke(err)
                 return@service
@@ -192,16 +200,18 @@ class FeathersSocket(private val context: Context) {
         ).getString("access_token", null)
 
         if (storedAccessToken != null) {
-            val data = "{\"strategy\":\"jwt\",\"accessToken\":\"$storedAccessToken\"}"
+            val jData = JSONObject()
+            jData.put("strategy", "jwt");
+            jData.put("accessToken", storedAccessToken);
 
-            service("authentication", Method.CREATE, packData(data)) { json, err ->
+            service("authentication", Method.CREATE, jData) { data, err ->
                 if (err != null) {
                     errorCallback?.invoke(err)
                     return@service
                 }
 
                 val auth = gson.fromJson(
-                    json.toString(), AuthenticationSuccessResponse::class.java
+                    data.toString(), AuthenticationSuccessResponse::class.java
                 )
                 if (storeTokenAndUser) storeAccessTokenAndSetUser(auth)
                 successCallback?.invoke(auth)

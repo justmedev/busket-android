@@ -4,15 +4,17 @@ import android.content.Context
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
-import com.github.nkzawa.engineio.client.transports.WebSocket
-import com.github.nkzawa.socketio.client.Ack
-import com.github.nkzawa.socketio.client.IO
-import com.github.nkzawa.socketio.client.Socket
 import com.google.gson.Gson
 import dev.justme.busket.SingletonHolder
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.User
+import io.socket.client.Ack
+import io.socket.client.IO
+import io.socket.client.Manager
+import io.socket.client.Socket
+import io.socket.engineio.client.transports.WebSocket
 import org.json.JSONObject
+
 
 data class SocketError(
     val name: String,
@@ -46,11 +48,11 @@ class FeathersSocket(private val context: Context) {
 
     //region connection
     private fun connect(connectedCallback: (() -> Unit)?) {
-        options.path = "/socket.io"
+        options.path = "/socket.io/"
         options.transports = arrayOf(WebSocket.NAME)
         socket.connect();
 
-        socket.on(Socket.EVENT_RECONNECT) {
+        socket.io().on(Manager.EVENT_RECONNECT) {
             tryAuthenticateWithAccessToken({
                 connectedCallback?.invoke()
             }, {
@@ -67,23 +69,12 @@ class FeathersSocket(private val context: Context) {
             socket.connect()
         }
 
-        socket.on(Socket.EVENT_ERROR) {
+        socket.on(Socket.EVENT_CONNECT_ERROR) {
             Log.d(TAG, "Socket error.")
         }
 
         socket.on(Socket.EVENT_CONNECT_ERROR) {
             Log.d(TAG, "Socket connection error.")
-        }
-        socket.on(Socket.EVENT_CONNECT_TIMEOUT) {
-            Log.d(TAG, "Socket connection timeout error.")
-        }
-
-        socket.on(Socket.EVENT_RECONNECT_FAILED) {
-            Log.d(TAG, "Socket reconnection failed.")
-        }
-
-        socket.on(Socket.EVENT_RECONNECT_ERROR) {
-            Log.d(TAG, "Socket reconnection error.")
         }
     }
 

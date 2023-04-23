@@ -26,6 +26,7 @@ data class SocketError(
 
 class FeathersSocket(private val context: Context) {
     //region privates
+    private val TAG = "Busket Socket";
     private val options = IO.Options()
     private val mainKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
     private var authentication: AuthenticationSuccessResponse? = null
@@ -58,31 +59,31 @@ class FeathersSocket(private val context: Context) {
         }
 
         socket.on(Socket.EVENT_CONNECT) {
-            Log.d("Busket Socket", "Socket connected. Invoking callback")
+            Log.d(TAG, "Socket connected. Invoking callback")
             connectedCallback?.invoke()
         }
         socket.on(Socket.EVENT_DISCONNECT) {
-            Log.d("Busket Socket", "Socket disconnected.")
+            Log.d(TAG, "Socket disconnected.")
             socket.connect()
         }
 
         socket.on(Socket.EVENT_ERROR) {
-            Log.d("Busket Socket", "Socket error.")
+            Log.d(TAG, "Socket error.")
         }
 
         socket.on(Socket.EVENT_CONNECT_ERROR) {
-            Log.d("Busket Socket", "Socket connection error.")
+            Log.d(TAG, "Socket connection error.")
         }
         socket.on(Socket.EVENT_CONNECT_TIMEOUT) {
-            Log.d("Busket Socket", "Socket connection timeout error.")
+            Log.d(TAG, "Socket connection timeout error.")
         }
 
         socket.on(Socket.EVENT_RECONNECT_FAILED) {
-            Log.d("Busket Socket", "Socket reconnection failed.")
+            Log.d(TAG, "Socket reconnection failed.")
         }
 
         socket.on(Socket.EVENT_RECONNECT_ERROR) {
-            Log.d("Busket Socket", "Socket reconnection error.")
+            Log.d(TAG, "Socket reconnection error.")
         }
     }
 

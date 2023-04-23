@@ -27,7 +27,6 @@ data class SocketError(
 class FeathersSocket(private val context: Context) {
     //region privates
     private val options = IO.Options()
-    private val gson = Gson()
     private val mainKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
     private var authentication: AuthenticationSuccessResponse? = null
     //endregion
@@ -35,7 +34,8 @@ class FeathersSocket(private val context: Context) {
     //region publics
     companion object : SingletonHolder<FeathersSocket, Context>(::FeathersSocket)
 
-    val socket = IO.socket("http://localhost:43005", options)
+    val gson = Gson()
+    val socket = IO.socket("http://localhost:3030", options)
     var user: User? = null
     //endregions
 
@@ -48,6 +48,14 @@ class FeathersSocket(private val context: Context) {
         options.path = "/socket.io"
         options.transports = arrayOf(WebSocket.NAME)
         socket.connect();
+
+        socket.on(Socket.EVENT_RECONNECT) {
+            tryAuthenticateWithAccessToken({
+                connectedCallback?.invoke()
+            }, {
+                connectedCallback?.invoke()
+            })
+        }
 
         socket.on(Socket.EVENT_CONNECT) {
             Log.d("Busket Socket", "Socket connected. Invoking callback")
@@ -80,6 +88,7 @@ class FeathersSocket(private val context: Context) {
 
     fun requireConnected(fn: () -> Unit) {
         if (!socket.connected()) connect(fn)
+        else fn.invoke()
     }
     //endregion
 
@@ -172,7 +181,7 @@ class FeathersSocket(private val context: Context) {
         jData.put("email", email)
         jData.put("password", password)
 
-        service("authentication", "create", jData) { data, err ->
+        service("authentication", Method.CREATE, jData) { data, err ->
             if (err != null) {
                 errorCallback?.invoke(err)
                 return@service

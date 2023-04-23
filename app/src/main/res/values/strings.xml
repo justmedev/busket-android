@@ -12,10 +12,16 @@
     <string name="email">Email</string>
     <string name="register">Register</string>
     <string name="welcome">Hello %1$s!</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
 
     <string name="add_shopping_list_item">Add shopping list item</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="trying_to_sign_in">Trying to sign you in</string>
     <string name="loading">Loading…</string>
+    <string name="add_shopping_list">Create Shopping list</string>
+    <string name="description">Description</string>
+    <string name="create">Create</string>
+    <string name="create_list">Create List</string>
 </resources>

@@ -111,33 +111,28 @@ class HomeFragment : Fragment() {
             binding.homeWelcome.text = getString(R.string.welcome, feathers?.user?.fullName)
         }
 
-        val socket = FeathersSocket.getInstance(requireContext())
-        // socket.req(requireContext())
+        val jData = JSONObject()
+        jData.put("owner", auth.user.uuid)
+        feathers?.service("list", FeathersSocket.Method.FIND, jData) { data, err ->
+            if (err != null || data == null) {
+                // Handle error
+                return@service
+            }
+            Log.d("Busket HomeFragment", data.toString())
 
-        val list = arrayOf(
-            ListOverview("Title", "Sub") { Log.d("Busket", "clicked sub") },
-            ListOverview("t", "s") { Log.d("Busket", "clicked s") })
+            val jArray = data.getJSONArray("data");
+            for (i in 0 until data.getInt("total")) {
+                val obj = jArray.getJSONObject(i)
+                val res = feathers?.gson?.fromJson(obj.toString(), ShoppingListResponse::class.java) ?: return@service
+                val shoppingList = ShoppingList(res.listId, res.name, res.description, res.owner, res.entries, res.checkedEntries)
+                shoppingLists.add(ListOverview(shoppingList) { Log.d("Busket", "clicked sub") })
 
-        handler.post {
-            binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(list)
+                handler.post {
+                    binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(shoppingLists.toTypedArray())
+                    binding.homeListOverviewRecyclerview.adapter?.notifyDataSetChanged()
+                }
+            }
         }
-
-        // TODO: Get lists from backend and populate recyclerview with real data
-        /*val shoppingList = ShoppingList(
-            UUID.randomUUID().toString(),
-            "Test-list-android",
-            "android test shopping list",
-            feathers?.user?.uuid ?: "UNKNOWN",
-            listOf()
-        )
-        feathers?.service("list")?.create(
-            shoppingList,
-            ShoppingListResponse::class.java,
-            {
-                Log.d("Busket sl name", it.name)
-            },
-            {
-                Log.d("Busket", it.networkResponse.data.toString()) })*/
     }
 
     override fun onDestroy() {

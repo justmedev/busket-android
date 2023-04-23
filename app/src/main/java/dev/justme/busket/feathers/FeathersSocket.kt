@@ -101,7 +101,7 @@ class FeathersSocket(private val context: Context) {
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         requireConnected {
-            socket.emit("%s::%s".format(name, method.lowercase()), data, Ack {
+            socket.emit(method.lowercase(), name.lowercase(), data, Ack {
                 var foundResponse = false
                 for (res in it) {
                     if (res != null) {

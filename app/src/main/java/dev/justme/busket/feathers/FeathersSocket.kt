@@ -28,14 +28,15 @@ data class SocketError(
 
 class FeathersSocket(private val context: Context) {
     //region privates
-    private val TAG = "Busket Socket";
     private val options = IO.Options()
     private val mainKey = MasterKey.Builder(context).setKeyScheme(MasterKey.KeyScheme.AES256_GCM).build()
     private var authentication: AuthenticationSuccessResponse? = null
     //endregion
 
     //region publics
-    companion object : SingletonHolder<FeathersSocket, Context>(::FeathersSocket)
+    companion object : SingletonHolder<FeathersSocket, Context>(::FeathersSocket) {
+        private const val TAG = "Busket Socket"
+    }
 
     val gson = Gson()
     val socket = IO.socket("http://localhost:3030", options)

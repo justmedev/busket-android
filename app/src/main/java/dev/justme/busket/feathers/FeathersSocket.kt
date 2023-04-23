@@ -14,6 +14,8 @@ import io.socket.client.Manager
 import io.socket.client.Socket
 import io.socket.engineio.client.transports.WebSocket
 import org.json.JSONObject
+import java.net.URISyntaxException
+import kotlin.system.exitProcess
 
 
 data class SocketError(
@@ -39,7 +41,7 @@ class FeathersSocket(private val context: Context) {
     }
 
     val gson = Gson()
-    val socket = IO.socket("http://localhost:3030", options)
+    val socket: Socket = IO.socket("http://localhost:3030", options)
     var user: User? = null
     //endregions
 

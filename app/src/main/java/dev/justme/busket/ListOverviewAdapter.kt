@@ -7,8 +7,9 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import dev.justme.busket.feathers.responses.ShoppingList
 
-data class ListOverview(val title: String, val subtitle: String, val onClick: OnClickListener)
+data class ListOverview(val shoppingList: ShoppingList, val onClick: OnClickListener)
 
 class ListOverviewAdapter(val lists: Array<ListOverview>) :
     RecyclerView.Adapter<ListOverviewAdapter.ListOverviewHolder>() {
@@ -17,9 +18,9 @@ class ListOverviewAdapter(val lists: Array<ListOverview>) :
         private val listSubtitle: TextView = itemView.findViewById(R.id.list_overview_item_subtitle)
         private val listOverviewCard: CardView = itemView.findViewById(R.id.list_overview_card)
 
-        fun bind(title: String, subtitle: String, onClick: OnClickListener) {
-            listTitle.text = title
-            listSubtitle.text = subtitle
+        fun bind(shoppingList: ShoppingList, onClick: OnClickListener) {
+            listTitle.text = shoppingList.name
+            listSubtitle.text = shoppingList.description
             listOverviewCard.setOnClickListener(onClick)
         }
     }
@@ -37,6 +38,6 @@ class ListOverviewAdapter(val lists: Array<ListOverview>) :
 
     override fun onBindViewHolder(holder: ListOverviewHolder, position: Int) {
         val item = lists[position]
-        holder.bind(item.title, item.subtitle, item.onClick)
+        holder.bind(item.shoppingList, item.onClick)
     }
 }

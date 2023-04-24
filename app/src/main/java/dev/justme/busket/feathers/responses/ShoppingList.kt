@@ -3,13 +3,8 @@ package dev.justme.busket.feathers.responses
 import com.google.gson.annotations.SerializedName
 import java.util.*
 
-class ShoppingListItems(
-    val items: List<ShoppingListItem>
-)
-
 class ShoppingListItem(
     val id: String,
-    val done: Boolean,
     val name: String,
 )
 
@@ -18,8 +13,8 @@ class ShoppingList(
     val name: String,
     val description: String,
     val owner: String,
-    val entries: ShoppingListItems,
-    val checkedEntries: ShoppingListItems,
+    val entries: List<ShoppingListItem>,
+    val checkedEntries: List<ShoppingListItem>,
 )
 
 data class ShoppingListResponse(
@@ -32,6 +27,6 @@ data class ShoppingListResponse(
     val name: String,
     val description: String,
     val owner: String,
-    val entries: ShoppingListItems,
-    val checkedEntries: ShoppingListItems,
+    val entries: List<ShoppingListItem>,
+    val checkedEntries: List<ShoppingListItem>,
 )

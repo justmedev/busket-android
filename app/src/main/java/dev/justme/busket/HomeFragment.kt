@@ -75,8 +75,8 @@ class HomeFragment : Fragment() {
                         createListName.text.trim().toString(),
                         createListDescription.text.trim().toString(),
                         feathers?.user?.uuid ?: "UNKNOWN",
-                        ShoppingListItems(emptyList()),
-                        ShoppingListItems(emptyList()),
+                        emptyList(),
+                        emptyList(),
                     )
 
                     val jData = JSONObject()
@@ -122,17 +122,17 @@ class HomeFragment : Fragment() {
 
             Log.d("Busket HomeFragment", data.toString())
 
-            val jArray = data.getJSONArray("data")
+            for (i in 0 until array.length()) {
+                val libraryEntry = array.getJSONObject(i)
+                val list = libraryEntry.getJSONObject("list")
 
-            for (i in 0 until data.getInt("total")) {
-                val obj = jArray.getJSONObject(i)
-                val res = feathers?.gson?.fromJson(obj.toString(), ShoppingListResponse::class.java) ?: return@service
-                val shoppingList = ShoppingList(res.listId, res.name, res.description, res.owner, res.entries, res.checkedEntries)
+                val res = feathers?.gson?.fromJson(libraryEntry.getJSONObject("list").toString(), ShoppingListResponse::class.java) ?: return@service
+                val shoppingList = ShoppingList(libraryEntry.getString("listId"), res.name, res.description, res.owner, res.entries, res.checkedEntries)
                 shoppingLists.add(ListOverview(shoppingList) { Log.d("Busket", "clicked sub") })
 
                 handler.post {
                     binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(shoppingLists.toTypedArray())
-                    binding.homeListOverviewRecyclerview.adapter?.notifyDataSetChanged()
+                    binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(i)
                 }
             }
         }

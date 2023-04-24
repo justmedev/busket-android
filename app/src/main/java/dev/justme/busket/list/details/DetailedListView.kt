@@ -8,12 +8,9 @@ import android.view.View
 import android.view.ViewGroup
 import dev.justme.busket.R
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_LIST_ID = "listId"
 
 class DetailedListView : Fragment() {
-    // TODO: Rename and change types of parameters
     private var listId: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +38,6 @@ class DetailedListView : Fragment() {
          * @param listId The id of the list to load.
          * @return A new instance of fragment DetailedListView.
          */
-        // TODO: Rename and change types and number of parameters
         @JvmStatic
         fun newInstance(listId: String) =
             DetailedListView().apply {

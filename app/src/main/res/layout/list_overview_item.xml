@@ -10,12 +10,12 @@
         style="@style/Widget.Material3.CardView.Filled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="2dp"
-        card_view:cardUseCompatPadding="true"
-        card_view:contentPadding="@dimen/vertical_space_small"
+        android:layout_marginBottom="@dimen/vertical_space_small"
+        android:clickable="true"
         android:elevation="0dp"
         android:foreground="?android:attr/selectableItemBackground"
-        android:clickable="true">
+        card_view:contentPadding="@dimen/vertical_space_small">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,17 +23,17 @@
 
             <TextView
                 android:id="@+id/list_overview_item_title"
+                style="@style/TextAppearance.Material3.BodyLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/TextAppearance.Material3.BodyLarge"
-                android:text="@string/loading"/>
+                android:text="@string/loading" />
 
             <TextView
                 android:id="@+id/list_overview_item_subtitle"
+                style="@style/MaterialAlertDialog.Material3.Body.Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                style="@style/MaterialAlertDialog.Material3.Body.Text"
-                android:text="@string/loading"/>
+                android:text="@string/loading" />
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>

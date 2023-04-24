@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.FeathersSocket
-import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.ShoppingList
 
 
@@ -37,17 +36,15 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.homeListOverviewRecyclerview.adapter = EmptyAdapter();
+
+        (requireActivity() as MainActivity).supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
         feathers = FeathersSocket.getInstance(context as Context)
-        if (feathers?.user == null) {
-            binding.homeMainContentContainer.visibility = View.GONE
-            binding.homeLoaderContainer.visibility = View.VISIBLE
-            feathers?.tryAuthenticateWithAccessToken({ afterLoginSuccess(it) }, {
-                Log.d("Busket", it.toString())
-                findNavController().navigate(R.id.action_HomeFragment_to_LoginFragment)
-            })
-        }
+        if (feathers?.user == null) findNavController().navigate(R.id.action_HomeFragment_to_LoginFragment)
+        handler.post { binding.homeWelcome.text = getString(R.string.welcome, feathers?.user?.fullName) }
+
+        binding.homeListOverviewRecyclerview.adapter = EmptyAdapter();
+        populateRecyclerView()
 
         binding.createShoppingListFab.setOnClickListener(::createShoppingList)
     }
@@ -95,13 +92,7 @@ class HomeFragment : Fragment() {
         alertDialog?.show()
     }
 
-    private fun afterLoginSuccess(auth: AuthenticationSuccessResponse) {
-        handler.post {
-            binding.homeLoaderContainer.visibility = View.GONE
-            binding.homeMainContentContainer.visibility = View.VISIBLE
-            binding.homeWelcome.text = getString(R.string.welcome, feathers?.user?.fullName)
-        }
-
+    private fun populateRecyclerView() {
         feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.FIND, null) { data, err ->
             if (err != null || data == null) {
                 // Handle error

@@ -38,6 +38,10 @@ class LoginFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
+
+        binding.loginContainer.visibility = View.VISIBLE
+        binding.loginLoaderContainer.visibility = View.GONE
+
         (activity as AppCompatActivity?)!!.supportActionBar!!.setDisplayHomeAsUpEnabled(false)
     }
 
@@ -68,8 +72,8 @@ class LoginFragment : Fragment() {
             if (validateInput(binding.loginEmailInput.text, binding.loginPasswordInput.text)) {
                 if (context == null) return@setOnClickListener
 
-                binding.loginRegisterButton.isEnabled = false
-                binding.loginLoginButton.isEnabled = false
+                binding.loginContainer.visibility = View.GONE
+                binding.loginLoaderContainer.visibility = View.VISIBLE
 
                 FeathersSocket.getInstance(requireContext()).authenticate(
                     binding.loginEmailInput.text.toString(),

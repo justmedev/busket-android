@@ -10,7 +10,9 @@ import androidx.recyclerview.widget.RecyclerView
 import dev.justme.busket.R
 import dev.justme.busket.feathers.responses.ShoppingList
 
-data class ListOverview(val shoppingList: ShoppingList, val onClick: OnClickListener)
+typealias ListClickListener = (v: View?, shoppingList: ShoppingList) -> Unit
+
+data class ListOverview(val shoppingList: ShoppingList, val onClick: ListClickListener)
 
 class ListOverviewAdapter(var lists: Array<ListOverview>) :
     RecyclerView.Adapter<ListOverviewAdapter.ListOverviewHolder>() {
@@ -19,10 +21,12 @@ class ListOverviewAdapter(var lists: Array<ListOverview>) :
         private val listSubtitle: TextView = itemView.findViewById(R.id.list_overview_item_subtitle)
         private val listOverviewCard: CardView = itemView.findViewById(R.id.list_overview_card)
 
-        fun bind(shoppingList: ShoppingList, onClick: OnClickListener) {
+        fun bind(shoppingList: ShoppingList, onClick: ListClickListener) {
             listTitle.text = shoppingList.name
             listSubtitle.text = shoppingList.description
-            listOverviewCard.setOnClickListener(onClick)
+            listOverviewCard.setOnClickListener {
+                onClick.invoke(it, shoppingList)
+            }
         }
     }
 

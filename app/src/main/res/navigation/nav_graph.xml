@@ -70,5 +70,18 @@
             app:popExitAnim="@android:anim/fade_out"
             app:popUpTo="@id/HomeFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_HomeFragment_to_DetailedListView"
+            app:destination="@id/DetailedListView" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/DetailedListView"
+        android:name="dev.justme.busket.list.details.DetailedListView"
+        android:label="@string/loading"
+        tools:layout="@layout/fragment_detailed_list_view">
+        <action
+            android:id="@+id/action_DetailedListView_to_HomeFragment"
+            app:destination="@id/HomeFragment" />
     </fragment>
 </navigation>

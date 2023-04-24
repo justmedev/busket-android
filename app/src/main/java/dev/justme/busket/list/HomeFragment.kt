@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -78,9 +79,7 @@ class HomeFragment : Fragment() {
 
                     feathers?.service(FeathersSocket.Service.LIST, FeathersSocket.Method.CREATE, listJSON) { data, error ->
                         if (error != null || data == null) return@service
-                        shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data)) {
-                            Log.d("Busket ShoppingList", "pressed")
-                        })
+                        shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data), ::openList))
                         handler.post {
                             (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toTypedArray()
                             binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(shoppingLists.lastIndex)
@@ -93,6 +92,10 @@ class HomeFragment : Fragment() {
             builder.create()
         }
         alertDialog?.show()
+    }
+
+    private fun openList(v: View?, list: ShoppingList) {
+        findNavController().navigate(R.id.action_HomeFragment_to_DetailedListView, bundleOf("listId" to list.listId))
     }
 
     private fun populateRecyclerView() {
@@ -110,7 +113,7 @@ class HomeFragment : Fragment() {
                 val libraryEntry = array.getJSONObject(i)
 
                 val shoppingList = ShoppingList.fromJSONObject(libraryEntry.getJSONObject("list"))
-                shoppingLists.add(ListOverview(shoppingList) { Log.d("Busket", "clicked sub") })
+                shoppingLists.add(ListOverview(shoppingList, ::openList))
 
                 handler.post {
                     binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(shoppingLists.toTypedArray())

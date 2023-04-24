@@ -48,6 +48,13 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val handler = Handler(Looper.getMainLooper())
+
+        FeathersSocket.getInstance(requireContext()).tryAuthenticateWithAccessToken({
+            handler.post {
+                findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+            }
+        })
 
         binding.loginEmailInput.doAfterTextChanged {
             if (it != null) validateInput(it, null)
@@ -63,14 +70,15 @@ class LoginFragment : Fragment() {
 
                 binding.loginRegisterButton.isEnabled = false
                 binding.loginLoginButton.isEnabled = false
-                val handler = Handler(Looper.getMainLooper())
 
                 FeathersSocket.getInstance(requireContext()).authenticate(
                     binding.loginEmailInput.text.toString(),
                     binding.loginPasswordInput.text.toString(),
                     {
                         Log.d("LoginFragment", "Success [%d]: %s".format(it.user.id, it.user.fullName))
-                        findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+                        handler.post {
+                            findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
+                        }
                     },
                     {
                         Log.d("LoginFragment", "Error: SocketError [%d]: %s".format(it.code, it.message))

@@ -5,15 +5,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:card_view="http://schemas.android.com/apk/res-auto">
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/list_overview_card"
+        style="@style/Widget.Material3.CardView.Filled"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:strokeWidth="1dp"
-        app:strokeColor="@color/cardview_dark_background"
-        android:layout_marginBottom="4dp"
+        android:layout_marginBottom="2dp"
         card_view:cardUseCompatPadding="true"
-        card_view:contentPadding="4dp"
+        card_view:contentPadding="@dimen/vertical_space_small"
         android:elevation="0dp"
         android:foreground="?android:attr/selectableItemBackground"
         android:clickable="true">
@@ -26,16 +25,16 @@
                 android:id="@+id/list_overview_item_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="16sp"
+                style="@style/TextAppearance.Material3.BodyLarge"
                 android:text="@string/loading"/>
 
             <TextView
                 android:id="@+id/list_overview_item_subtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:alpha="0.75"
+                style="@style/MaterialAlertDialog.Material3.Body.Text"
                 android:text="@string/loading"/>
         </LinearLayout>
 
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </FrameLayout>

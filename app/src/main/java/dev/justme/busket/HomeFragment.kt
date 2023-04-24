@@ -6,18 +6,16 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.FeathersSocket
-import dev.justme.busket.feathers.responses.*
-import org.json.JSONArray
-import org.json.JSONObject
-import java.util.*
+import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
+import dev.justme.busket.feathers.responses.ShoppingList
 
 
 class HomeFragment : Fragment() {
@@ -70,26 +68,18 @@ class HomeFragment : Fragment() {
                         return@setPositiveButton
                     }
 
-                    val shoppingList = ShoppingList(
-                        UUID.randomUUID().toString(),
+                    val listJSON = ShoppingList(
+                        null,
                         createListName.text.trim().toString(),
                         createListDescription.text.trim().toString(),
-                        feathers?.user?.uuid ?: "UNKNOWN",
+                        null,
                         emptyList(),
                         emptyList(),
-                    )
+                    ).toJSONObject()
 
-                    val jData = JSONObject()
-                    jData.put("listid", shoppingList.listId)
-                    jData.put("name", shoppingList.name)
-                    jData.put("description", shoppingList.description)
-                    jData.put("owner", shoppingList.owner)
-                    jData.put("entries", shoppingList.entries)
-                    jData.put("checkedEntries", shoppingList.checkedEntries)
-
-                    feathers?.service("list", FeathersSocket.Method.CREATE, jData) { data, error ->
+                    feathers?.service("list", FeathersSocket.Method.CREATE, listJSON) { data, error ->
                         if (error != null || data == null) return@service
-                        shoppingLists.add(ListOverview(shoppingList) {
+                        shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data)) {
                             Log.d("Busket ShoppingList", "pressed")
                         })
                         handler.post {
@@ -124,10 +114,8 @@ class HomeFragment : Fragment() {
 
             for (i in 0 until array.length()) {
                 val libraryEntry = array.getJSONObject(i)
-                val list = libraryEntry.getJSONObject("list")
 
-                val res = feathers?.gson?.fromJson(libraryEntry.getJSONObject("list").toString(), ShoppingListResponse::class.java) ?: return@service
-                val shoppingList = ShoppingList(libraryEntry.getString("listId"), res.name, res.description, res.owner, res.entries, res.checkedEntries)
+                val shoppingList = ShoppingList.fromJSONObject(libraryEntry.getJSONObject("list"))
                 shoppingLists.add(ListOverview(shoppingList) { Log.d("Busket", "clicked sub") })
 
                 handler.post {

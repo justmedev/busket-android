@@ -11,7 +11,7 @@
     <string name="name">Name</string>
     <string name="email">Email</string>
     <string name="register">Register</string>
-    <string name="welcome">Hello %1$s!</string>
+    <string name="welcome">%1$s\'s lists</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
 

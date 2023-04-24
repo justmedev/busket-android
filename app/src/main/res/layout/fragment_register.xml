@@ -4,16 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="@dimen/vertical_space"
+    android:layout_marginBottom="@dimen/vertical_space"
     tools:context=".RegisterFragment">
 
     <TextView
         android:id="@+id/register_registerTitleText"
+        style="?attr/textAppearanceHeadline5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="32dp"
         android:text="@string/register"
-        android:textSize="26dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -22,9 +22,8 @@
         android:id="@+id/register_nameInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/register_registerTitleText"
-        tools:layout_editor_absoluteX="16dp">
+        android:layout_marginTop="@dimen/vertical_space_small"
+        app:layout_constraintTop_toBottomOf="@+id/register_registerTitleText">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/register_nameInput"
@@ -37,9 +36,8 @@
         android:id="@+id/register_emailInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/register_nameInputLayout"
-        tools:layout_editor_absoluteX="16dp">
+        android:layout_marginTop="@dimen/vertical_space_small"
+        app:layout_constraintTop_toBottomOf="@+id/register_nameInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/register_emailInput"
@@ -52,9 +50,8 @@
         android:id="@+id/register_passwordInputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/register_emailInputLayout"
-        tools:layout_editor_absoluteX="16dp">
+        android:layout_marginTop="@dimen/vertical_space_small"
+        app:layout_constraintTop_toBottomOf="@+id/register_emailInputLayout">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/register_passwordInput"
@@ -79,7 +76,6 @@
         android:id="@+id/register_registerButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="32dp"
         android:text="@string/register"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

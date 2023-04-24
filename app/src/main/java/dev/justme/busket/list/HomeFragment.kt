@@ -44,7 +44,7 @@ class HomeFragment : Fragment() {
 
         feathers = FeathersSocket.getInstance(context as Context)
         if (feathers?.user == null) findNavController().navigate(R.id.action_HomeFragment_to_LoginFragment)
-        handler.post { binding.homeWelcome.text = getString(R.string.welcome, feathers?.user?.fullName) }
+        (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.welcome, feathers?.user?.fullName)
 
         binding.homeListOverviewRecyclerview.adapter = EmptyAdapter();
         populateRecyclerView()

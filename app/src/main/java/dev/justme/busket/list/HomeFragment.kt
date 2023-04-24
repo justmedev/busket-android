@@ -99,6 +99,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun populateRecyclerView() {
+        shoppingLists.clear()
+
         feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.FIND, null) { data, err ->
             if (err != null || data == null) {
                 // Handle error

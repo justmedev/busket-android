@@ -37,6 +37,7 @@ class FeathersSocket(private val context: Context) {
     //region publics
     companion object : SingletonHolder<FeathersSocket, Context>(::FeathersSocket) {
         private const val TAG = "Busket Socket"
+        const val ARRAY_DATA_KEY = "arrayData"
     }
 
     val gson = Gson()

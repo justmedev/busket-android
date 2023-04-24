@@ -36,7 +36,7 @@ class ShoppingList(
         jsonObject.put("description", description)
         if (owner != null) jsonObject.put("owner", owner)
         jsonObject.put("entries", entries)
-        jsonObject.put("entries", checkedEntries)
+        jsonObject.put("checkedEntries", checkedEntries)
 
         return jsonObject
     }

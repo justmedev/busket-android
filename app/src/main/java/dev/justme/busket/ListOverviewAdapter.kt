@@ -11,7 +11,7 @@ import dev.justme.busket.feathers.responses.ShoppingList
 
 data class ListOverview(val shoppingList: ShoppingList, val onClick: OnClickListener)
 
-class ListOverviewAdapter(val lists: Array<ListOverview>) :
+class ListOverviewAdapter(var lists: Array<ListOverview>) :
     RecyclerView.Adapter<ListOverviewAdapter.ListOverviewHolder>() {
     class ListOverviewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val listTitle: TextView = itemView.findViewById(R.id.list_overview_item_title)

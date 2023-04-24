@@ -74,12 +74,13 @@ class HomeFragment : Fragment() {
                         emptyList(),
                     ).toJSONObject()
 
-                    feathers?.service("list", FeathersSocket.Method.CREATE, listJSON) { data, error ->
+                    feathers?.service(FeathersSocket.Service.LIST, FeathersSocket.Method.CREATE, listJSON) { data, error ->
                         if (error != null || data == null) return@service
                         shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data)) {
                             Log.d("Busket ShoppingList", "pressed")
                         })
                         handler.post {
+                            (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toTypedArray()
                             binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(shoppingLists.lastIndex)
                         }
                     }

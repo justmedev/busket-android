@@ -13,9 +13,8 @@ import io.socket.client.IO
 import io.socket.client.Manager
 import io.socket.client.Socket
 import io.socket.engineio.client.transports.WebSocket
+import org.json.JSONArray
 import org.json.JSONObject
-import java.net.URISyntaxException
-import kotlin.system.exitProcess
 
 
 data class SocketError(
@@ -47,6 +46,14 @@ class FeathersSocket(private val context: Context) {
 
     enum class Method {
         FIND, GET, CREATE, UPDATE, PATCH, REMOVE
+    }
+
+    enum class Service(val path: String) {
+        EVENT("event"),
+        LIST("list"),
+        LIBRARY("library"),
+        WHITELISTED_USERS("whitelisted-users"),
+        USERS("users"),
     }
 
     //region connection
@@ -89,37 +96,57 @@ class FeathersSocket(private val context: Context) {
 
     //region service methods
     fun service(
+        name: Service,
+        method: Method,
+        data: JSONObject?,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        service(name.path, method.toString(), data, callback)
+    }
+
+    fun service(
         name: String,
         method: Method,
-        data: JSONObject,
+        data: JSONObject?,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         service(name, method.toString(), data, callback)
     }
 
+    fun isSuccessCode(statusCode: Int): Boolean {
+        var code = statusCode
+        while (code > 9) code /= 10
+        return code == 2
+    }
+
     fun service(
         name: String,
         method: String,
-        data: JSONObject,
+        data: JSONObject?,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         requireConnected {
-            socket.emit(method.lowercase(), name.lowercase(), data, Ack {
+            socket.emit(method.lowercase(), name.lowercase(), data ?: JSONObject(), Ack {
                 var foundResponse = false
                 for (res in it) {
                     if (res != null) {
                         foundResponse = true
 
-                        val json = res as JSONObject
-                        if (!json.has("code")) json.put("code", 200);
-
-                        if (json.getInt("code") != 200) {
-                            val errorObj = gson.fromJson(it[0].toString(), SocketError::class.java)
-                            callback.invoke(json, errorObj)
+                        var out = JSONObject()
+                        var statusCode = 200
+                        if (res is JSONObject) {
+                            out = res
+                            if (res.has("code")) statusCode = res.getInt("code")
+                        } else if (res is JSONArray) {
+                            out = JSONObject().put("arrayData", res)
+                        }
+                        if (!isSuccessCode(statusCode)) {
+                            val errorObj = gson.fromJson(res.toString(), SocketError::class.java)
+                            callback.invoke(null, errorObj)
                             return@Ack
                         }
 
-                        callback.invoke(json, null)
+                        callback.invoke(out, null)
                         return@Ack
                     }
                 }

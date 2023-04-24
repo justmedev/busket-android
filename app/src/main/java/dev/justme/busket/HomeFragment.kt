@@ -15,6 +15,7 @@ import androidx.navigation.fragment.findNavController
 import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.*
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.*
 
@@ -111,16 +112,18 @@ class HomeFragment : Fragment() {
             binding.homeWelcome.text = getString(R.string.welcome, feathers?.user?.fullName)
         }
 
-        val jData = JSONObject()
-        jData.put("owner", auth.user.uuid)
-        feathers?.service("list", FeathersSocket.Method.FIND, jData) { data, err ->
+        feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.FIND, null) { data, err ->
             if (err != null || data == null) {
                 // Handle error
                 return@service
             }
+
+            val array = data.getJSONArray("arrayData")
+
             Log.d("Busket HomeFragment", data.toString())
 
-            val jArray = data.getJSONArray("data");
+            val jArray = data.getJSONArray("data")
+
             for (i in 0 until data.getInt("total")) {
                 val obj = jArray.getJSONObject(i)
                 val res = feathers?.gson?.fromJson(obj.toString(), ShoppingListResponse::class.java) ?: return@service

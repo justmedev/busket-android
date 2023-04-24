@@ -1,9 +1,10 @@
-package dev.justme.busket
+package dev.justme.busket.list
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import dev.justme.busket.R
 
 class EmptyAdapter :
     RecyclerView.Adapter<EmptyAdapter.EmptyHolder>() {

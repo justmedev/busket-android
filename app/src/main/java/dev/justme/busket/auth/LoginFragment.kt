@@ -1,4 +1,4 @@
-package dev.justme.busket
+package dev.justme.busket.auth
 
 import android.os.Bundle
 import android.os.Handler
@@ -13,6 +13,7 @@ import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.snackbar.Snackbar
+import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentLoginBinding
 import dev.justme.busket.feathers.FeathersSocket
 

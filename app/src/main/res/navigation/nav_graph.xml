@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/LoginFragment"
-        android:name="dev.justme.busket.LoginFragment"
+        android:name="dev.justme.busket.auth.LoginFragment"
         android:label="@string/login_fragment_label"
         tools:layout="@layout/fragment_login">
 
@@ -32,7 +32,7 @@
     </fragment>
     <fragment
         android:id="@+id/RegisterFragment"
-        android:name="dev.justme.busket.RegisterFragment"
+        android:name="dev.justme.busket.auth.RegisterFragment"
         android:label="@string/register_fragment_label"
         tools:layout="@layout/fragment_register">
 
@@ -57,7 +57,7 @@
 
     <fragment
         android:id="@+id/HomeFragment"
-        android:name="dev.justme.busket.HomeFragment"
+        android:name="dev.justme.busket.list.HomeFragment"
         android:label="@string/home_fragment_label"
         tools:layout="@layout/fragment_home">
 

@@ -1,4 +1,4 @@
-package dev.justme.busket
+package dev.justme.busket.helpers
 
 open class SingletonHolder<out T, in A>(private val constructor: (A) -> T) {
 

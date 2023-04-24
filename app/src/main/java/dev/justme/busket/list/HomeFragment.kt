@@ -1,4 +1,4 @@
-package dev.justme.busket
+package dev.justme.busket.list
 
 import android.content.Context
 import android.os.Bundle
@@ -12,6 +12,8 @@ import android.widget.EditText
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dev.justme.busket.MainActivity
+import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList

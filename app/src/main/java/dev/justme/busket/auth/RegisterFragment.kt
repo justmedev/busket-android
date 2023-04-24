@@ -1,4 +1,4 @@
-package dev.justme.busket
+package dev.justme.busket.auth
 
 import android.os.Bundle
 import android.os.Handler
@@ -10,7 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.textfield.TextInputEditText
+import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentRegisterBinding
 import dev.justme.busket.feathers.FeathersSocket
 import org.json.JSONObject

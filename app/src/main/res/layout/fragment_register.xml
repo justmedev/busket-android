@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:padding="@dimen/vertical_space"
     android:layout_marginBottom="@dimen/vertical_space"
-    tools:context=".RegisterFragment">
+    tools:context=".auth.RegisterFragment">
 
     <TextView
         android:id="@+id/register_registerTitleText"

@@ -10,7 +10,7 @@ import com.android.volley.RequestQueue
 import com.android.volley.VolleyError
 import com.android.volley.toolbox.*
 import com.google.gson.Gson
-import dev.justme.busket.SingletonHolder
+import dev.justme.busket.helpers.SingletonHolder
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.User
 import org.json.JSONObject

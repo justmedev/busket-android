@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
-import dev.justme.busket.SingletonHolder
+import dev.justme.busket.helpers.SingletonHolder
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.User
 import io.socket.client.Ack

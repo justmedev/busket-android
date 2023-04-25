@@ -33,4 +33,7 @@
         We were unable to delete your account. Please check your internet connection and try again later. If the issue persists, try deleting it via our website (<a href="https://busket.bux.at">https://busket.bux.at</a>)
     </string>
     <string name="manage_whitelisted">Manage Whitelisted Users</string>
+    <string name="todo">Todo</string>
+    <string name="done">Done</string>
+    <string name="alt_entry_handle">handle for item</string>
 </resources>

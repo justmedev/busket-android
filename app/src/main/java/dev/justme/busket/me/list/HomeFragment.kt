@@ -118,6 +118,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun populateRecyclerView() {
+        binding.homeListOverviewRecyclerview.visibility = View.GONE
+        binding.homeListOverviewLoader.visibility = View.VISIBLE
         shoppingLists.clear()
 
         feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.FIND, null) { data, err ->
@@ -139,6 +141,9 @@ class HomeFragment : Fragment() {
                 handler.post {
                     binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(shoppingLists.toTypedArray())
                     binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(i)
+
+                    binding.homeListOverviewRecyclerview.visibility = View.VISIBLE
+                    binding.homeListOverviewLoader.visibility = View.GONE
                 }
             }
         }

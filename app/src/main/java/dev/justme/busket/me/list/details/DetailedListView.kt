@@ -5,10 +5,17 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.MenuHost
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import dev.justme.busket.MainActivity
+import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
@@ -54,6 +61,7 @@ class DetailedListView : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentDetailedListViewBinding.inflate(inflater)
+        setupMenu()
 
         feathers = FeathersSocket.getInstance(requireContext())
         Log.d("Busket DetailedListView", "onCreate.arguments.listId: $listId")
@@ -67,6 +75,22 @@ class DetailedListView : Fragment() {
         }
 
         return binding.root;
+    }
+
+
+    private fun setupMenu() {
+        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
+            override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+                menuInflater.inflate(R.menu.detailed_list_menu, menu)
+            }
+
+            override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+                if (menuItem.itemId == R.id.action_manage_whitelisted) {
+                    //FIXME: Open Dialog for managing whitelisted users
+                }
+                return false
+            }
+        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     companion object {

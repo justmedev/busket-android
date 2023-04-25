@@ -110,7 +110,7 @@ class FeathersSocket(private val context: Context) {
         data: String,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
-        service(name.path, method.toString(), data, callback)
+        service(name.path, method.toString(), JSONObject(data), callback)
     }
 
     fun service(
@@ -137,17 +137,8 @@ class FeathersSocket(private val context: Context) {
         data: JSONObject?,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
-        service(name, method, data?.toString() ?: JSONObject().toString(), callback)
-    }
-
-    fun service(
-        name: String,
-        method: String,
-        data: String,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
         requireConnected {
-            socket.emit(method.lowercase(), name.lowercase(), data, Ack {
+            socket.emit(method.lowercase(), name.lowercase(), data ?: JSONObject(), Ack {
                 var foundResponse = false
                 for (res in it) {
                     if (res != null) {

@@ -52,7 +52,7 @@ class HomeFragment : Fragment() {
         if (feathers?.user == null) findNavController().navigate(R.id.action_HomeFragment_to_LoginFragment)
         (requireActivity() as MainActivity).supportActionBar?.title = getString(R.string.welcome, feathers?.user?.fullName)
 
-        binding.homeListOverviewRecyclerview.adapter = EmptyAdapter();
+        binding.homeListOverviewRecyclerview.adapter = EmptyAdapter()
         populateRecyclerView()
 
         binding.createShoppingListFab.setOnClickListener(::createShoppingList)
@@ -74,7 +74,7 @@ class HomeFragment : Fragment() {
     private fun createShoppingList(view: View) {
         val alertDialog: androidx.appcompat.app.AlertDialog? = activity?.let {
             val builder = MaterialAlertDialogBuilder(it)
-            val inflater = requireActivity().layoutInflater;
+            val inflater = requireActivity().layoutInflater
             val dialogView = inflater.inflate(R.layout.dialog_create_list, null)
 
             builder.setView(dialogView)

@@ -61,7 +61,7 @@ class FeathersSocket(private val context: Context) {
     private fun connect(connectedCallback: (() -> Unit)?) {
         options.path = "/socket.io/"
         options.transports = arrayOf(WebSocket.NAME)
-        socket.connect();
+        socket.connect()
 
         socket.io().on(Manager.EVENT_RECONNECT) {
             tryAuthenticateWithAccessToken({
@@ -199,7 +199,7 @@ class FeathersSocket(private val context: Context) {
         errorCallback: ((e: SocketError) -> Unit)? = null,
         storeTokenAndUser: Boolean = true,
     ) {
-        val jData = JSONObject();
+        val jData = JSONObject()
         jData.put("strategy", "local")
         jData.put("email", email)
         jData.put("password", password)
@@ -233,8 +233,8 @@ class FeathersSocket(private val context: Context) {
 
         if (storedAccessToken != null) {
             val jData = JSONObject()
-            jData.put("strategy", "jwt");
-            jData.put("accessToken", storedAccessToken);
+            jData.put("strategy", "jwt")
+            jData.put("accessToken", storedAccessToken)
 
             service("authentication", Method.CREATE, jData) { data, err ->
                 if (err != null) {

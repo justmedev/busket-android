@@ -51,7 +51,7 @@ class RegisterFragment : Fragment() {
                 binding.registerLoginButton.isEnabled = false
                 val handler = Handler(Looper.getMainLooper())
 
-                val feathersSocket = FeathersSocket.getInstance(requireContext());
+                val feathersSocket = FeathersSocket.getInstance(requireContext())
 
                 /*val obj = feathersSocket.packData(object {
                     val uuid = UUID.randomUUID().toString()

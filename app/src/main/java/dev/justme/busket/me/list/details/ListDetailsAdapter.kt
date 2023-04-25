@@ -1,12 +1,15 @@
 package dev.justme.busket.me.list.details
 
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.card.MaterialCardView
 import dev.justme.busket.R
+import java.util.Collections
+
 
 typealias ListClickListener = (v: View?, entryId: String) -> Unit
 
@@ -14,10 +17,11 @@ data class ListDetailsRecyclerEntry(val checked: Boolean, val name: String, val 
 
 data class ListItemDetails(val entry: ListDetailsRecyclerEntry, val onClick: ListClickListener)
 
-class ListDetailsAdapter(var entries: Array<ListItemDetails>) :
-    RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>() {
+class ListDetailsAdapter(var entries: MutableList<ListItemDetails>) :
+    RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
     class ListDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: CheckBox = itemView.findViewById(R.id.listDetailsItemCheck)
+        val card: MaterialCardView = itemView.findViewById(R.id.listDetailsCard)
 
         fun bind(entry: ListDetailsRecyclerEntry, onClick: ListClickListener) {
             checkBox.text = entry.name
@@ -40,5 +44,26 @@ class ListDetailsAdapter(var entries: Array<ListItemDetails>) :
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
         holder.bind(item.entry, item.onClick)
+    }
+
+    override fun onRowMoved(fromPosition: Int, toPosition: Int) {
+        if (fromPosition < toPosition) {
+            for (i in fromPosition until toPosition) {
+                Collections.swap(entries, i, i + 1)
+            }
+        } else {
+            for (i in fromPosition downTo toPosition + 1) {
+                Collections.swap(entries, i, i - 1)
+            }
+        }
+        notifyItemMoved(fromPosition, toPosition)
+    }
+
+    override fun onRowSelected(viewHolder: ListDetailsHolder?) {
+        viewHolder?.card?.setBackgroundColor(Color.GRAY)
+    }
+
+    override fun onRowClear(viewHolder: ListDetailsHolder?) {
+        viewHolder?.card?.setBackgroundColor(Color.WHITE)
     }
 }

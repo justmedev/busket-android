@@ -14,6 +14,7 @@ import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.recyclerview.widget.ItemTouchHelper
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
@@ -74,8 +75,8 @@ class DetailedListView : Fragment() {
             binding.listLoader.visibility = View.GONE
         }
 
-        binding.todoList.adapter = ListDetailsAdapter(
-            arrayOf(
+        val adapter = ListDetailsAdapter(
+            mutableListOf(
                 ListItemDetails(
                     ListDetailsRecyclerEntry(true, "1", "id")
                 ) { a, id ->
@@ -93,7 +94,9 @@ class DetailedListView : Fragment() {
                 }
             )
         )
-        binding.todoList.adapter
+
+        ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
+        binding.todoList.adapter = adapter
 
         return binding.root;
     }

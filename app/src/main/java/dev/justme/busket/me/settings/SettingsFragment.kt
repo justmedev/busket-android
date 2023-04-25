@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentSettingsBinding
@@ -34,6 +35,7 @@ class SettingsFragment : Fragment() {
         val feathers = FeathersSocket.getInstance(requireContext())
         binding.logoutBtn.setOnClickListener {
             feathers.logout()
+            findNavController().navigate(R.id.action_Settings_to_LoginFragment)
         }
 
         binding.deleteAccountBtn.setOnClickListener {

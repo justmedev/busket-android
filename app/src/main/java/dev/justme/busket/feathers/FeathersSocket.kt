@@ -1,13 +1,14 @@
 package dev.justme.busket.feathers
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.util.Log
 import androidx.security.crypto.EncryptedSharedPreferences
 import androidx.security.crypto.MasterKey
 import com.google.gson.Gson
-import dev.justme.busket.helpers.SingletonHolder
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.User
+import dev.justme.busket.helpers.SingletonHolder
 import io.socket.client.Ack
 import io.socket.client.IO
 import io.socket.client.Manager
@@ -55,6 +56,7 @@ class FeathersSocket(private val context: Context) {
         LIBRARY("library"),
         WHITELISTED_USERS("whitelisted-users"),
         USERS("users"),
+        AUTHENTICATION("authentication"),
     }
 
     //region connection
@@ -204,7 +206,7 @@ class FeathersSocket(private val context: Context) {
         jData.put("email", email)
         jData.put("password", password)
 
-        service("authentication", Method.CREATE, jData) { data, err ->
+        service(Service.AUTHENTICATION, Method.CREATE, jData) { data, err ->
             if (err != null) {
                 errorCallback?.invoke(err)
                 return@service
@@ -223,20 +225,14 @@ class FeathersSocket(private val context: Context) {
         errorCallback: ((e: SocketError) -> Unit)? = null,
         storeTokenAndUser: Boolean = true,
     ) {
-        val storedAccessToken = EncryptedSharedPreferences.create(
-            context,
-            "encrypted_shared_prefs",
-            mainKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        ).getString("access_token", null)
+        val storedAccessToken = getEncryptedSharedPreferences().getString("access_token", null)
 
         if (storedAccessToken != null) {
             val jData = JSONObject()
             jData.put("strategy", "jwt")
             jData.put("accessToken", storedAccessToken)
 
-            service("authentication", Method.CREATE, jData) { data, err ->
+            service(Service.AUTHENTICATION, Method.CREATE, jData) { data, err ->
                 if (err != null) {
                     errorCallback?.invoke(err)
                     return@service
@@ -262,14 +258,18 @@ class FeathersSocket(private val context: Context) {
         }
     }
 
-    private fun storeAccessTokenAndSetUser(auth: AuthenticationSuccessResponse) {
-        EncryptedSharedPreferences.create(
+    private fun getEncryptedSharedPreferences(): SharedPreferences {
+        return EncryptedSharedPreferences.create(
             context,
             "encrypted_shared_prefs",
             mainKey,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        ).edit().putString("access_token", auth.accessToken).apply()
+        )
+    }
+
+    private fun storeAccessTokenAndSetUser(auth: AuthenticationSuccessResponse) {
+        getEncryptedSharedPreferences().edit().putString("access_token", auth.accessToken).apply()
 
         authentication = auth
         user = auth.user
@@ -277,6 +277,14 @@ class FeathersSocket(private val context: Context) {
 
     fun getAuthentication(): AuthenticationSuccessResponse? {
         return authentication
+    }
+
+    fun logout() {
+        getEncryptedSharedPreferences().edit().putString("access_token", null).apply()
+
+        requireConnected {
+            service(Service.AUTHENTICATION, Method.REMOVE, JSONObject()) { _, _ -> }
+        }
     }
     //endregion
 }

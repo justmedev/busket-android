@@ -5,7 +5,11 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentSettingsBinding
+import dev.justme.busket.feathers.FeathersSocket
+import org.json.JSONObject
 
 private const val LIST_ID_ARG = "listId"
 
@@ -26,6 +30,22 @@ class SettingsFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentSettingsBinding.inflate(inflater)
+
+        val feathers = FeathersSocket.getInstance(requireContext())
+        binding.logoutBtn.setOnClickListener {
+            feathers.logout()
+        }
+
+        binding.deleteAccountBtn.setOnClickListener {
+            feathers.service(FeathersSocket.Service.USERS, FeathersSocket.Method.REMOVE, JSONObject()) { data, err ->
+                if (err != null) {
+                    MaterialAlertDialogBuilder(requireContext()).setCancelable(false).setTitle(R.string.unexpected_error).setMessage(R.string.error_deleting_user).setPositiveButton(R.string.ok) { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                }
+            }
+        }
+
         return binding.root
     }
 

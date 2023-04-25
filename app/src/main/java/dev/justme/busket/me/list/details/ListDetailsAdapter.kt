@@ -11,12 +11,13 @@ import java.util.Collections
 
 
 typealias ListClickListener = (v: View?, entryId: String) -> Unit
+typealias ItemMovedListener = (fromPosition: Int, toPosition: Int) -> Unit
 
 data class ListDetailsRecyclerEntry(val checked: Boolean, val name: String, val id: String)
 
 data class ListItemDetails(val entry: ListDetailsRecyclerEntry, val onClick: ListClickListener)
 
-class ListDetailsAdapter(var entries: MutableList<ListItemDetails>) :
+class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMoved: ItemMovedListener) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
     class ListDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: CheckBox = itemView.findViewById(R.id.listDetailsItemCheck)
@@ -56,6 +57,7 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>) :
             }
         }
         notifyItemMoved(fromPosition, toPosition)
+        onItemMoved.invoke(fromPosition, toPosition)
     }
 
     override fun onRowSelected(viewHolder: ListDetailsHolder?) {

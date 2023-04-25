@@ -75,32 +75,16 @@ class DetailedListView : Fragment() {
             binding.listLoader.visibility = View.GONE
         }
 
-        val adapter = ListDetailsAdapter(
-            mutableListOf(
-                ListItemDetails(
-                    ListDetailsRecyclerEntry(true, "1", "id")
-                ) { a, id ->
-                    Log.d("DetailsListView", "onCreateView: Clicked $id")
-                },
-                ListItemDetails(
-                    ListDetailsRecyclerEntry(true, "2", "id1")
-                ) { a, id ->
-                    Log.d("DetailsListView", "onCreateView: Clicked $id")
-                },
-                ListItemDetails(
-                    ListDetailsRecyclerEntry(true, "3", "id2")
-                ) { a, id ->
-                    Log.d("DetailsListView", "onCreateView: Clicked $id")
-                }
-            )
-        )
-
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved)
         ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
 
         return binding.root;
     }
 
+    private fun onItemMoved(fromPosition: Int, toPosition: Int) {
+
+    }
 
     private fun setupMenu() {
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {

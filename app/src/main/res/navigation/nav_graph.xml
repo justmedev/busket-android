@@ -91,6 +91,7 @@
     <fragment
         android:id="@+id/Settings"
         android:name="dev.justme.busket.me.settings.SettingsFragment"
-        android:label="@string/loading">
+        android:label="@string/settings"
+        tools:layout="@layout/fragment_settings">
     </fragment>
 </navigation>

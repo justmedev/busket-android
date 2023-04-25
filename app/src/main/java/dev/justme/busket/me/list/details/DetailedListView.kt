@@ -21,6 +21,7 @@ import dev.justme.busket.databinding.FragmentDetailedListViewBinding
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONObject
+import java.lang.Error
 
 private const val ARG_LIST_ID = "listId"
 
@@ -33,6 +34,7 @@ class DetailedListView : Fragment() {
     private var listId: String? = null
     private var list: ShoppingList? = null
     private lateinit var feathers: FeathersSocket
+    private lateinit var syncListDetailsManager: SyncListDetailsManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +72,9 @@ class DetailedListView : Fragment() {
         binding.listContainer.visibility = View.GONE
         binding.listLoader.visibility = View.VISIBLE
         loadListFromRemote {
+            if (list == null) throw Exception("list should not be able to be null here!")
+            syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
+
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name
             binding.listContainer.visibility = View.VISIBLE
             binding.listLoader.visibility = View.GONE

@@ -1,6 +1,5 @@
 package dev.justme.busket.me.list.details
 
-import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -60,10 +59,10 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>) :
     }
 
     override fun onRowSelected(viewHolder: ListDetailsHolder?) {
-        viewHolder?.card?.setBackgroundColor(Color.GRAY)
+        viewHolder?.card?.alpha = 0.7f
     }
 
     override fun onRowClear(viewHolder: ListDetailsHolder?) {
-        viewHolder?.card?.setBackgroundColor(Color.WHITE)
+        viewHolder?.card?.alpha = 1f
     }
 }

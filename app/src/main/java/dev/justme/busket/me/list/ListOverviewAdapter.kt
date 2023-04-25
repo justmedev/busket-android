@@ -1,8 +1,7 @@
-package dev.justme.busket.list
+package dev.justme.busket.me.list
 
 import android.view.LayoutInflater
 import android.view.View
-import android.view.View.OnClickListener
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.cardview.widget.CardView

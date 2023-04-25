@@ -1,4 +1,4 @@
-package dev.justme.busket.list
+package dev.justme.busket.me.list
 
 import android.view.LayoutInflater
 import android.view.View

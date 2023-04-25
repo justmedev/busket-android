@@ -57,7 +57,7 @@
 
     <fragment
         android:id="@+id/HomeFragment"
-        android:name="dev.justme.busket.list.HomeFragment"
+        android:name="dev.justme.busket.me.list.HomeFragment"
         android:label="@string/home_fragment_label"
         tools:layout="@layout/fragment_home">
 
@@ -80,7 +80,7 @@
 
     <fragment
         android:id="@+id/DetailedListView"
-        android:name="dev.justme.busket.list.details.DetailedListView"
+        android:name="dev.justme.busket.me.list.details.DetailedListView"
         android:label="@string/loading"
         tools:layout="@layout/fragment_detailed_list_view">
         <action

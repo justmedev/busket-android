@@ -1,4 +1,4 @@
-package dev.justme.busket.list.details
+package dev.justme.busket.me.list.details
 
 import android.os.Bundle
 import android.os.Handler

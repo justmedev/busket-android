@@ -98,6 +98,21 @@ class FeathersSocket(private val context: Context) {
     //endregion
 
     //region service methods
+    fun isSuccessCode(statusCode: Int): Boolean {
+        var code = statusCode
+        while (code > 9) code /= 10
+        return code == 2
+    }
+
+    fun service(
+        name: Service,
+        method: Method,
+        data: String,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        service(name.path, method.toString(), data, callback)
+    }
+
     fun service(
         name: Service,
         method: Method,
@@ -116,20 +131,23 @@ class FeathersSocket(private val context: Context) {
         service(name, method.toString(), data, callback)
     }
 
-    fun isSuccessCode(statusCode: Int): Boolean {
-        var code = statusCode
-        while (code > 9) code /= 10
-        return code == 2
-    }
-
     fun service(
         name: String,
         method: String,
         data: JSONObject?,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
+        service(name, method, data?.toString() ?: JSONObject().toString(), callback)
+    }
+
+    fun service(
+        name: String,
+        method: String,
+        data: String,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
         requireConnected {
-            socket.emit(method.lowercase(), name.lowercase(), data ?: JSONObject(), Ack {
+            socket.emit(method.lowercase(), name.lowercase(), data, Ack {
                 var foundResponse = false
                 for (res in it) {
                     if (res != null) {

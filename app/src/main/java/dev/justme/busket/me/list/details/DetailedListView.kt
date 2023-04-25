@@ -71,18 +71,24 @@ class DetailedListView : Fragment() {
 
         binding.listContainer.visibility = View.GONE
         binding.listLoader.visibility = View.VISIBLE
+
+
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved)
+        ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
+        binding.todoList.adapter = adapter
+
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
             syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
+            val entries = list!!.entries.toMutableList()
+            for (entry in entries) {
+                (binding.todoList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(false, entry.name, entry.id), ::onItemCheckStateChange))
+            }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name
             binding.listContainer.visibility = View.VISIBLE
             binding.listLoader.visibility = View.GONE
         }
-
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved)
-        ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
-        binding.todoList.adapter = adapter
 
         return binding.root;
     }

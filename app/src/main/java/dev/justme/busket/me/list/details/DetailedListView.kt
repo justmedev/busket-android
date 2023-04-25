@@ -9,7 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import dev.justme.busket.MainActivity
-import dev.justme.busket.R
+import dev.justme.busket.databinding.FragmentDetailedListViewBinding
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONObject
@@ -17,6 +17,9 @@ import org.json.JSONObject
 private const val ARG_LIST_ID = "listId"
 
 class DetailedListView : Fragment() {
+    private var _binding: FragmentDetailedListViewBinding? = null
+    private val binding get() = _binding!!
+
     private val handler = Handler(Looper.getMainLooper())
 
     private var listId: String? = null
@@ -27,13 +30,6 @@ class DetailedListView : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             listId = it.getString(ARG_LIST_ID)
-        }
-
-        feathers = FeathersSocket.getInstance(requireContext())
-        Log.d("Busket DetailedListView", "onCreate.arguments.listId: $listId")
-
-        loadListFromRemote {
-            (requireActivity() as MainActivity).supportActionBar?.title = list?.name
         }
     }
 
@@ -56,9 +52,21 @@ class DetailedListView : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_detailed_list_view, container, false)
+    ): View {
+        _binding = FragmentDetailedListViewBinding.inflate(inflater)
+
+        feathers = FeathersSocket.getInstance(requireContext())
+        Log.d("Busket DetailedListView", "onCreate.arguments.listId: $listId")
+
+        binding.listContainer.visibility = View.GONE
+        binding.listLoader.visibility = View.VISIBLE
+        loadListFromRemote {
+            (requireActivity() as MainActivity).supportActionBar?.title = list?.name
+            binding.listContainer.visibility = View.VISIBLE
+            binding.listLoader.visibility = View.GONE
+        }
+
+        return binding.root;
     }
 
     companion object {

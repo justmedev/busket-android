@@ -83,7 +83,11 @@ class DetailedListView : Fragment() {
     }
 
     private fun onItemMoved(fromPosition: Int, toPosition: Int) {
+        throw NotImplementedError("TODO: Implement")
+    }
 
+    private fun onItemCheckStateChange(entry: ListDetailsRecyclerEntry) {
+        throw NotImplementedError("TODO: Implement")
     }
 
     private fun setupMenu() {

@@ -77,7 +77,17 @@ class DetailedListView : Fragment() {
         binding.todoList.adapter = ListDetailsAdapter(
             arrayOf(
                 ListItemDetails(
-                    ListDetailsRecyclerEntry(true, "Hi", "id")
+                    ListDetailsRecyclerEntry(true, "1", "id")
+                ) { a, id ->
+                    Log.d("DetailsListView", "onCreateView: Clicked $id")
+                },
+                ListItemDetails(
+                    ListDetailsRecyclerEntry(true, "2", "id1")
+                ) { a, id ->
+                    Log.d("DetailsListView", "onCreateView: Clicked $id")
+                },
+                ListItemDetails(
+                    ListDetailsRecyclerEntry(true, "3", "id2")
                 ) { a, id ->
                     Log.d("DetailsListView", "onCreateView: Clicked $id")
                 }

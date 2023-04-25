@@ -87,8 +87,9 @@ class DetailedListView : Fragment() {
         return binding.root;
     }
 
-    private fun onItemMoved(fromPosition: Int, toPosition: Int) {
-        throw NotImplementedError("TODO: Implement")
+    private fun onItemMoved(entry: ListDetailsRecyclerEntry,  fromPosition: Int, toPosition: Int) {
+        val state = ShoppingListEventState(entry.name, fromPosition, toPosition)
+        syncListDetailsManager.recordEvent(ShoppingListEventType.MOVE_ENTRY, entry.id, state)
     }
 
     private fun onItemCheckStateChange(entry: ListDetailsRecyclerEntry) {

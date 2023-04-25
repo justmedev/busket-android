@@ -11,7 +11,7 @@ import java.util.Collections
 
 
 typealias ListClickListener = (v: View?, entryId: String) -> Unit
-typealias ItemMovedListener = (fromPosition: Int, toPosition: Int) -> Unit
+typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: Int, toPosition: Int) -> Unit
 
 data class ListDetailsRecyclerEntry(val checked: Boolean, val name: String, val id: String)
 
@@ -57,7 +57,7 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMo
             }
         }
         notifyItemMoved(fromPosition, toPosition)
-        onItemMoved.invoke(fromPosition, toPosition)
+        onItemMoved.invoke(entries[toPosition].entry, fromPosition, toPosition)
     }
 
     override fun onRowSelected(viewHolder: ListDetailsHolder?) {

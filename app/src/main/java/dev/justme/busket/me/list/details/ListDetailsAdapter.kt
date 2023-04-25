@@ -18,14 +18,11 @@ class ListDetailsAdapter(var entries: Array<ListItemDetails>) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>() {
     class ListDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: CheckBox = itemView.findViewById(R.id.listDetailsItemCheck)
-        private val listOverviewCard: CardView = itemView.findViewById(R.id.listDetailsCard)
 
         fun bind(entry: ListDetailsRecyclerEntry, onClick: ListClickListener) {
             checkBox.text = entry.name
             checkBox.isChecked = entry.checked
-            listOverviewCard.setOnClickListener {
-                onClick.invoke(it, entry.id)
-            }
+            checkBox.setOnClickListener { onClick.invoke(it, entry.id) }
         }
     }
 

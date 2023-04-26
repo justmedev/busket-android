@@ -19,7 +19,7 @@
 
 
         <LinearLayout
-            android:id="@+id/detailedListTextInputLayout"
+            android:id="@+id/addItemContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -28,6 +28,7 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/detailedListTextInputLayout"
                 android:inputType="text"
                 android:lines="1"
                 android:maxLines="1"
@@ -39,6 +40,7 @@
                 android:layout_weight="1">
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:imeOptions="actionDone"
                     android:inputType="text"
                     android:lines="1"
                     android:maxLines="1"
@@ -48,6 +50,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <Button
+                android:id="@+id/addItemBtn"
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -63,7 +66,7 @@
             android:text="@string/todo"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/detailedListTextInputLayout" />
+            app:layout_constraintTop_toBottomOf="@id/addItemContainer" />
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/todoList"

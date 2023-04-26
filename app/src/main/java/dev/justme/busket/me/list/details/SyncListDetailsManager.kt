@@ -65,10 +65,13 @@ data class ShoppingListEvent(
 
 class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
     private val feathers = FeathersSocket.getInstance(context)
-    private val eventQueue: MutableList<ShoppingListEvent> = mutableListOf()
     private val sessionUUID = UUID.randomUUID().toString()
+    val eventQueue: MutableList<ShoppingListEvent> = mutableListOf()
 
     fun recordEvent(event: ShoppingListEventType, entryId: String, eventState: ShoppingListEventState) {
+        recordEvent(event, entryId, eventState, true)
+    }
+    fun recordEvent(event: ShoppingListEventType, entryId: String, eventState: ShoppingListEventState, sendToServer: Boolean) {
         if (list.listId == null) return
 
         val offsetDate = OffsetDateTime.of(LocalDateTime.now(), ZoneOffset.UTC)
@@ -77,10 +80,10 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
         val eventData = ShoppingListEventData(event, entryId, sessionUUID, isoDate, eventState)
         eventQueue.add(ShoppingListEvent(list.listId, eventData))
 
-        sendEventsToServer()
+        if (sendToServer) sendEventsToServer()
     }
 
-    private fun sendEventsToServer() {
+    fun sendEventsToServer() {
         val curHandling = eventQueue.toMutableList()
         eventQueue.clear()
         feathers.service(FeathersSocket.Service.EVENT, FeathersSocket.Method.CREATE, JSONArray(feathers.gson.toJson(curHandling))) { data, err ->

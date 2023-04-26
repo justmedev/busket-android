@@ -38,4 +38,6 @@
     <string name="alt_entry_handle">handle for item</string>
     <string name="add">Add</string>
     <string name="add_item">Add item</string>
+    <string name="delete_all_done_items">Delete all done items</string>
+    <string name="clear">Clear</string>
 </resources>

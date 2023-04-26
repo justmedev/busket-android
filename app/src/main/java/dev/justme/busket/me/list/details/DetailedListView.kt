@@ -1,5 +1,6 @@
 package dev.justme.busket.me.list.details
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -69,7 +70,6 @@ class DetailedListView : Fragment() {
         setupMenu()
 
         feathers = FeathersSocket.getInstance(requireContext())
-        Log.d("Busket DetailedListView", "onCreate.arguments.listId: $listId")
 
         binding.listContainer.visibility = View.GONE
         binding.listLoader.visibility = View.VISIBLE
@@ -80,6 +80,10 @@ class DetailedListView : Fragment() {
                 createEntry()
                 true
             } else false
+        }
+
+        binding.clearBtn.setOnClickListener {
+            clearDone()
         }
 
         val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, true)
@@ -107,6 +111,20 @@ class DetailedListView : Fragment() {
         }
 
         return binding.root;
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun clearDone() {
+        val clearedEntries = (binding.doneList.adapter as ListDetailsAdapter).entries.toMutableList()
+        (binding.doneList.adapter as ListDetailsAdapter).entries.clear()
+        (binding.doneList.adapter as ListDetailsAdapter).notifyDataSetChanged()
+
+        for (entry in clearedEntries) {
+            val state = ShoppingListEventState(entry.name, null, null)
+            syncListDetailsManager.recordEvent(ShoppingListEventType.DELETE_ENTRY, entry.id, state, false)
+        }
+
+        syncListDetailsManager.sendEventsToServer()
     }
 
     private fun createEntry() {

@@ -59,6 +59,7 @@
         </LinearLayout>
 
         <TextView
+            android:layout_marginTop="@dimen/vertical_space_small"
             android:id="@+id/todoListTitle"
             style="@style/MaterialAlertDialog.Material3.Title.Text"
             android:layout_width="match_parent"
@@ -77,16 +78,31 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/todoListTitle" />
 
-        <TextView
-            android:id="@+id/doneListTitle"
-            style="@style/MaterialAlertDialog.Material3.Title.Text"
+        <LinearLayout
+            android:id="@+id/doneListTitleContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/vertical_space_small"
-            android:text="@string/done"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/todoList" />
+            app:layout_constraintTop_toBottomOf="@id/todoList"
+            android:layout_marginTop="@dimen/vertical_space_small"
+            android:orientation="horizontal">
+            <TextView
+                style="@style/MaterialAlertDialog.Material3.Title.Text"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="@string/done" />
+
+            <Button
+                android:id="@+id/clearBtn"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:text="@string/clear"
+                android:layout_width="60dp"
+                android:paddingHorizontal="0dp"
+                android:layout_height="40dp"
+                android:layout_gravity="end"/>
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/doneList"
@@ -96,7 +112,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/doneListTitle" />
+            app:layout_constraintTop_toBottomOf="@+id/doneListTitleContainer" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator

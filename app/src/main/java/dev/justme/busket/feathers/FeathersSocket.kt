@@ -16,6 +16,7 @@ import io.socket.client.Socket
 import io.socket.engineio.client.transports.WebSocket
 import org.json.JSONArray
 import org.json.JSONObject
+import kotlin.reflect.typeOf
 
 
 data class SocketError(
@@ -116,7 +117,7 @@ class FeathersSocket(private val context: Context) {
     fun service(
         name: Service,
         method: Method,
-        data: JSONObject?,
+        data: JSONArray,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         service(name.path, method.toString(), data, callback)
@@ -125,18 +126,58 @@ class FeathersSocket(private val context: Context) {
     fun service(
         name: String,
         method: Method,
-        data: JSONObject?,
+        data: JSONArray,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         service(name, method.toString(), data, callback)
     }
 
     fun service(
-        name: String,
-        method: String,
-        data: JSONObject?,
+        name: Service,
+        method: Method,
+        data: JSONObject,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
+        service(name.path, method.toString(), data, callback)
+    }
+
+    fun service(
+        name: String,
+        method: Method,
+        data: JSONObject,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        service(name, method.toString(), data, callback)
+    }
+
+    fun service(
+        name: Service,
+        method: Method,
+        data: Any?,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        service(name.toString(), method.toString(), data, callback)
+    }
+
+    fun service(
+        name: String,
+        method: Method,
+        data: Any?,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        service(name, method.toString(), data, callback)
+    }
+
+    private fun service(
+        name: String,
+        method: String,
+        data: Any?,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        if (data !is JSONArray && data !is JSONObject && data !is String && data != null) {
+            throw Exception("data can either be JSONARRAY, JSONOBJECT or String! Cannot be of type ${data::class.java.typeName}")
+        }
+
         requireConnected {
             socket.emit(method.lowercase(), name.lowercase(), data ?: JSONObject(), Ack {
                 var foundResponse = false

@@ -89,7 +89,7 @@ class DetailedListView : Fragment() {
 
             val checkedEntries = list!!.checkedEntries.toMutableList()
             for (entry in checkedEntries) {
-                (binding.doneList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(false, entry.name, entry.id), ::onItemCheckStateChange))
+                (binding.doneList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(true, entry.name, entry.id), ::onItemCheckStateChange))
             }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name

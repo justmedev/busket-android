@@ -4,19 +4,18 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.google.android.material.textfield.TextInputLayout
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
@@ -24,6 +23,7 @@ import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONObject
 import java.util.UUID
+
 
 private const val ARG_LIST_ID = "listId"
 
@@ -75,12 +75,11 @@ class DetailedListView : Fragment() {
         binding.listLoader.visibility = View.VISIBLE
 
         binding.addItemBtn.setOnClickListener { createEntry() }
-        binding.detailedListTextInputLayout.setOnKeyListener { _, keyCode, event ->
-            if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
+        binding.detailedListTextInputLayout.editText!!.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_DONE) {
                 createEntry()
-                return@setOnKeyListener true
-            }
-            return@setOnKeyListener false
+                true
+            } else false
         }
 
         val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, true)
@@ -118,6 +117,7 @@ class DetailedListView : Fragment() {
 
         val state = ShoppingListEventState(entry.name, null, null)
         syncListDetailsManager.recordEvent(ShoppingListEventType.CREATE_ENTRY, entry.id, state)
+        binding.detailedListTextInputLayout.editText!!.text = null
     }
 
     private fun onItemMoved(entry: ListDetailsRecyclerEntry, fromPosition: Int, toPosition: Int) {

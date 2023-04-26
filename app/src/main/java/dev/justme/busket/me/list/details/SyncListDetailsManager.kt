@@ -1,12 +1,15 @@
 package dev.justme.busket.me.list.details
 
 import android.content.Context
+import android.util.Log
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
+import org.json.JSONArray
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.util.Arrays
 import java.util.UUID
 
 /*
@@ -77,17 +80,14 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
         sendEventsToServer()
     }
 
-    fun sendEventsToServer() {
-        if (!feathers.socket.connected()) return
-        if (eventQueue.size > 0) sendEventToServer(eventQueue.last())
-    }
-
-    private fun sendEventToServer(event: ShoppingListEvent) {
-        feathers.service(FeathersSocket.Service.EVENT, FeathersSocket.Method.CREATE, feathers.gson.toJson(event)) { data, err ->
-            if (data == null || err != null) return@service
-
-            eventQueue.removeFirst()
-            if (eventQueue.size > 0) sendEventToServer(eventQueue.first())
+    private fun sendEventsToServer() {
+        val curHandling = eventQueue.toMutableList()
+        eventQueue.clear()
+        feathers.service(FeathersSocket.Service.EVENT, FeathersSocket.Method.CREATE, JSONArray(feathers.gson.toJson(curHandling))) { data, err ->
+            if (data == null || err != null) {
+                eventQueue.addAll(curHandling)
+                return@service
+            }
         }
     }
 }

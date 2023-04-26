@@ -14,11 +14,10 @@ import java.util.Collections
 typealias ListClickListener = (entry: ListDetailsRecyclerEntry) -> Unit
 typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: Int, toPosition: Int) -> Unit
 
-data class ListDetailsRecyclerEntry(val checked: Boolean, val name: String, val id: String)
+data class ListDetailsRecyclerEntry(var checked: Boolean, val name: String, val id: String)
 
-data class ListItemDetails(val entry: ListDetailsRecyclerEntry, val onClick: ListClickListener)
 
-class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMoved: ItemMovedListener, val showItemHandle: Boolean) :
+class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMoved: ItemMovedListener, val onItemClicked: ListClickListener, val showItemHandle: Boolean) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
     class ListDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: CheckBox = itemView.findViewById(R.id.listDetailsItemCheck)
@@ -29,7 +28,10 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMo
             if (!showHandle) handle.visibility = View.GONE;
             checkBox.text = entry.name
             checkBox.isChecked = entry.checked
-            checkBox.setOnClickListener { onClick.invoke(entry) }
+            checkBox.setOnClickListener {
+                entry.checked = !entry.checked
+                onClick.invoke(entry)
+            }
         }
     }
 
@@ -46,7 +48,7 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMo
 
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
-        holder.bind(item.entry, item.onClick, showItemHandle)
+        holder.bind(item, onItemClicked, showItemHandle)
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {
@@ -60,7 +62,7 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMo
             }
         }
         notifyItemMoved(fromPosition, toPosition)
-        onItemMoved.invoke(entries[toPosition].entry, fromPosition, toPosition)
+        onItemMoved.invoke(entries[toPosition], fromPosition, toPosition)
     }
 
     override fun onRowSelected(viewHolder: ListDetailsHolder?) {

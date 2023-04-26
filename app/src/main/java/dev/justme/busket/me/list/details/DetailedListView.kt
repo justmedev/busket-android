@@ -21,7 +21,6 @@ import dev.justme.busket.databinding.FragmentDetailedListViewBinding
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONObject
-import java.lang.Error
 
 private const val ARG_LIST_ID = "listId"
 
@@ -73,23 +72,24 @@ class DetailedListView : Fragment() {
         binding.listLoader.visibility = View.VISIBLE
 
 
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, true)
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved,  ::onItemCheckStateChange, true)
+
         ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
 
-        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, false)
+        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved,  ::onItemCheckStateChange, false)
 
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
             syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
             val entries = list!!.entries.toMutableList()
             for (entry in entries) {
-                (binding.todoList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(false, entry.name, entry.id), ::onItemCheckStateChange))
+                (binding.todoList.adapter as ListDetailsAdapter).entries.add(ListDetailsRecyclerEntry(false, entry.name, entry.id))
             }
 
             val checkedEntries = list!!.checkedEntries.toMutableList()
             for (entry in checkedEntries) {
-                (binding.doneList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(true, entry.name, entry.id), ::onItemCheckStateChange))
+                (binding.doneList.adapter as ListDetailsAdapter).entries.add(ListDetailsRecyclerEntry(true, entry.name, entry.id))
             }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name
@@ -100,14 +100,32 @@ class DetailedListView : Fragment() {
         return binding.root;
     }
 
-    private fun onItemMoved(entry: ListDetailsRecyclerEntry,  fromPosition: Int, toPosition: Int) {
+    private fun onItemMoved(entry: ListDetailsRecyclerEntry, fromPosition: Int, toPosition: Int) {
         val state = ShoppingListEventState(entry.name, fromPosition, toPosition)
         syncListDetailsManager.recordEvent(ShoppingListEventType.MOVE_ENTRY, entry.id, state)
     }
 
     private fun onItemCheckStateChange(entry: ListDetailsRecyclerEntry) {
-        throw NotImplementedError("TODO: Implement")
-    }
+        val eventType = if (entry.checked) ShoppingListEventType.MARK_ENTRY_DONE else ShoppingListEventType.MARK_ENTRY_TODO
+        val state = ShoppingListEventState(entry.name, null, null)
+        syncListDetailsManager.recordEvent(eventType, entry.id, state)
+
+        if (entry.checked) {
+            val index = (binding.todoList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entry.id }
+            (binding.todoList.adapter as ListDetailsAdapter).entries.removeAt(index)
+            (binding.todoList.adapter as ListDetailsAdapter).notifyItemRemoved(index)
+
+            (binding.doneList.adapter as ListDetailsAdapter).entries.add(0, entry)
+            (binding.doneList.adapter as ListDetailsAdapter).notifyItemInserted(0)
+        } else {
+            val index = (binding.doneList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entry.id }
+            (binding.doneList.adapter as ListDetailsAdapter).entries.removeAt(index)
+            (binding.doneList.adapter as ListDetailsAdapter).notifyItemRemoved(index)
+
+            (binding.todoList.adapter as ListDetailsAdapter).entries.add(0, entry)
+            (binding.todoList.adapter as ListDetailsAdapter).notifyItemInserted(0)
+        }
+      }
 
     private fun setupMenu() {
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {

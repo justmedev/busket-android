@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.card.MaterialCardView
 import dev.justme.busket.R
@@ -17,13 +18,15 @@ data class ListDetailsRecyclerEntry(val checked: Boolean, val name: String, val 
 
 data class ListItemDetails(val entry: ListDetailsRecyclerEntry, val onClick: ListClickListener)
 
-class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMoved: ItemMovedListener) :
+class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMoved: ItemMovedListener, val showItemHandle: Boolean) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
     class ListDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: CheckBox = itemView.findViewById(R.id.listDetailsItemCheck)
+        private val handle: ImageView = itemView.findViewById(R.id.listDetailsItemHandle)
         val card: MaterialCardView = itemView.findViewById(R.id.listDetailsCard)
 
-        fun bind(entry: ListDetailsRecyclerEntry, onClick: ListClickListener) {
+        fun bind(entry: ListDetailsRecyclerEntry, onClick: ListClickListener, showHandle: Boolean) {
+            if (!showHandle) handle.visibility = View.GONE;
             checkBox.text = entry.name
             checkBox.isChecked = entry.checked
             checkBox.setOnClickListener { onClick.invoke(entry) }
@@ -43,7 +46,7 @@ class ListDetailsAdapter(var entries: MutableList<ListItemDetails>, val onItemMo
 
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
-        holder.bind(item.entry, item.onClick)
+        holder.bind(item.entry, item.onClick, showItemHandle)
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {

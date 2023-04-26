@@ -73,9 +73,11 @@ class DetailedListView : Fragment() {
         binding.listLoader.visibility = View.VISIBLE
 
 
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved)
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, true)
         ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
+
+        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, false)
 
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
@@ -83,6 +85,11 @@ class DetailedListView : Fragment() {
             val entries = list!!.entries.toMutableList()
             for (entry in entries) {
                 (binding.todoList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(false, entry.name, entry.id), ::onItemCheckStateChange))
+            }
+
+            val checkedEntries = list!!.checkedEntries.toMutableList()
+            for (entry in checkedEntries) {
+                (binding.doneList.adapter as ListDetailsAdapter).entries.add(ListItemDetails(ListDetailsRecyclerEntry(false, entry.name, entry.id), ::onItemCheckStateChange))
             }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name

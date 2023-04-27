@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -95,6 +94,29 @@ class DetailedListView : Fragment() {
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
             syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
+            syncListDetailsManager.registerEventListener(
+                ShoppingListEventListeners(
+                    {
+                        createEntry(it.eventData.state.name, it.eventData.entryId, false)
+                    },
+                    {
+                        TODO()
+                    },
+                    {
+                        TODO()
+                    },
+                    {
+                        TODO()
+                    },
+                    {
+                        onItemCheckStateChange(ListDetailsRecyclerEntry(false, it.eventData.state.name, it.eventData.entryId))
+                    },
+                    {
+                        onItemCheckStateChange(ListDetailsRecyclerEntry(true, it.eventData.state.name, it.eventData.entryId))
+                    },
+                )
+            )
+
             val entries = list!!.entries.toMutableList()
             for (entry in entries) {
                 (binding.todoList.adapter as ListDetailsAdapter).entries.add(ListDetailsRecyclerEntry(false, entry.name, entry.id))
@@ -113,12 +135,18 @@ class DetailedListView : Fragment() {
         return binding.root;
     }
 
-    @SuppressLint("NotifyDataSetChanged")
+    // region handle list events
     private fun clearDone() {
+        clearDone(true)
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun clearDone(recordEvent: Boolean) {
         val clearedEntries = (binding.doneList.adapter as ListDetailsAdapter).entries.toMutableList()
         (binding.doneList.adapter as ListDetailsAdapter).entries.clear()
         (binding.doneList.adapter as ListDetailsAdapter).notifyDataSetChanged()
 
+        if (!recordEvent) return
         for (entry in clearedEntries) {
             val state = ShoppingListEventState(entry.name, null, null)
             syncListDetailsManager.recordEvent(ShoppingListEventType.DELETE_ENTRY, entry.id, state, false)
@@ -129,13 +157,19 @@ class DetailedListView : Fragment() {
 
     private fun createEntry() {
         val name = binding.detailedListTextInputLayout.editText!!.text!!.trim().toString()
-        val entry = ListDetailsRecyclerEntry(false, name, UUID.randomUUID().toString())
+        createEntry(name, UUID.randomUUID().toString(), true)
+        binding.detailedListTextInputLayout.editText!!.text = null
+    }
+
+    private fun createEntry(name: String, id: String, recordEvent: Boolean) {
+        val entry = ListDetailsRecyclerEntry(false, name, id)
         (binding.todoList.adapter as ListDetailsAdapter).entries.add(0, entry)
         (binding.todoList.adapter as ListDetailsAdapter).notifyItemInserted(0)
 
-        val state = ShoppingListEventState(entry.name, null, null)
-        syncListDetailsManager.recordEvent(ShoppingListEventType.CREATE_ENTRY, entry.id, state)
-        binding.detailedListTextInputLayout.editText!!.text = null
+        if (recordEvent) {
+            val state = ShoppingListEventState(entry.name, null, null)
+            syncListDetailsManager.recordEvent(ShoppingListEventType.CREATE_ENTRY, entry.id, state)
+        }
     }
 
     private fun onItemMoved(entry: ListDetailsRecyclerEntry, fromPosition: Int, toPosition: Int) {
@@ -144,9 +178,15 @@ class DetailedListView : Fragment() {
     }
 
     private fun onItemCheckStateChange(entry: ListDetailsRecyclerEntry) {
-        val eventType = if (entry.checked) ShoppingListEventType.MARK_ENTRY_DONE else ShoppingListEventType.MARK_ENTRY_TODO
-        val state = ShoppingListEventState(entry.name, null, null)
-        syncListDetailsManager.recordEvent(eventType, entry.id, state)
+        onItemCheckStateChange(entry, true)
+    }
+
+    private fun onItemCheckStateChange(entry: ListDetailsRecyclerEntry, recordEvent: Boolean) {
+        if (recordEvent) {
+            val eventType = if (entry.checked) ShoppingListEventType.MARK_ENTRY_DONE else ShoppingListEventType.MARK_ENTRY_TODO
+            val state = ShoppingListEventState(entry.name, null, null)
+            syncListDetailsManager.recordEvent(eventType, entry.id, state)
+        }
 
         if (entry.checked) {
             val index = (binding.todoList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entry.id }
@@ -164,6 +204,7 @@ class DetailedListView : Fragment() {
             (binding.todoList.adapter as ListDetailsAdapter).notifyItemInserted(0)
         }
     }
+    // endregion
 
     private fun setupMenu() {
         (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {

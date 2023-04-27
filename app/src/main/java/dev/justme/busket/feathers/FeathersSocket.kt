@@ -51,6 +51,13 @@ class FeathersSocket(private val context: Context) {
         FIND, GET, CREATE, UPDATE, PATCH, REMOVE
     }
 
+    enum class SocketEventListener(val method: String) {
+        CREATED("created"),
+        UPDATED("updated"),
+        PATCHED("patched"),
+        REMOVED("removed"),
+    }
+
     enum class Service(val path: String) {
         EVENT("event"),
         LIST("list"),
@@ -337,4 +344,37 @@ class FeathersSocket(private val context: Context) {
         }
     }
     //endregion
+
+    // region event listeners
+    fun on(
+        service: Service,
+        event: SocketEventListener,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        requireConnected {
+            socket.on("${service.path} ${event.method}") {
+                for (res in it) {
+                    if (res != null) {
+                        var out = JSONObject()
+                        var statusCode = 200
+
+                        if (res is JSONObject) {
+                            out = res
+                            if (res.has("code")) statusCode = res.getInt("code")
+                        } else if (res is JSONArray) {
+                            out = JSONObject().put("arrayData", res)
+                        }
+
+                        if (isSuccessCode(statusCode)) {
+                            callback.invoke(out, null)
+                        } else {
+                           val errorObj = gson.fromJson(res.toString(), SocketError::class.java)
+                            callback.invoke(null, errorObj)
+                        }
+                    }
+                }
+            }
+        }
+    }
+    // endregion event listeners
 }

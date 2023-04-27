@@ -1,7 +1,9 @@
 package dev.justme.busket.me.list.details
 
 import android.content.Context
+import android.os.Looper
 import android.util.Log
+import com.google.gson.annotations.SerializedName
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONArray
@@ -9,8 +11,9 @@ import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
-import java.util.Arrays
 import java.util.UUID
+import java.util.logging.Handler
+
 
 /*
 export interface EventData {
@@ -36,11 +39,22 @@ export interface LogEvent {
  */
 
 enum class ShoppingListEventType(name: String) {
+    @SerializedName("MOVE_ENTRY")
     MOVE_ENTRY("MOVE_ENTRY"),
+
+    @SerializedName("DELETE_ENTRY")
     DELETE_ENTRY("DELETE_ENTRY"),
+
+    @SerializedName("CREATE_ENTRY")
     CREATE_ENTRY("CREATE_ENTRY"),
+
+    @SerializedName("CHANGED_ENTRY_NAME")
     CHANGED_ENTRY_NAME("CHANGED_ENTRY_NAME"),
+
+    @SerializedName("MARK_ENTRY_DONE")
     MARK_ENTRY_DONE("MARK_ENTRY_DONE"),
+
+    @SerializedName("MARK_ENTRY_TODO")
     MARK_ENTRY_TODO("MARK_ENTRY_TODO"),
 }
 
@@ -63,14 +77,56 @@ data class ShoppingListEvent(
     val eventData: ShoppingListEventData
 )
 
+
+typealias ShoppingListEventListener = (event: ShoppingListEvent) -> Unit;
+
+data class ShoppingListEventListeners(
+    val created: ShoppingListEventListener,
+    val moved: ShoppingListEventListener,
+    val deleted: ShoppingListEventListener,
+    val renamed: ShoppingListEventListener,
+    val markedAsTodo: ShoppingListEventListener,
+    val markedAsDone: ShoppingListEventListener,
+)
+
 class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
     private val feathers = FeathersSocket.getInstance(context)
     private val sessionUUID = UUID.randomUUID().toString()
-    val eventQueue: MutableList<ShoppingListEvent> = mutableListOf()
+    private val eventQueue: MutableList<ShoppingListEvent> = mutableListOf()
+    private var eventListenerAttached = false
+    private var eventListeners: ShoppingListEventListeners? = null
+    private val handler = android.os.Handler(Looper.getMainLooper())
+
+    fun registerEventListener(listeners: ShoppingListEventListeners) {
+        if (eventListenerAttached) {
+            Log.w("Busket ${javaClass.simpleName}", "EventListener for Sync is already attached! Cannot attach twice")
+            return
+        }
+        eventListenerAttached = true
+        eventListeners = listeners
+
+        feathers.on(FeathersSocket.Service.EVENT, FeathersSocket.SocketEventListener.CREATED) { data, err ->
+            if (err != null) return@on // TODO: Handle error
+            val event: ShoppingListEvent = feathers.gson.fromJson(data.toString(), ShoppingListEvent::class.java)
+            if (event.eventData.sender == sessionUUID) return@on // Events this client has sent are already handled
+
+            handler.post {
+                when (event.eventData.event) {
+                    ShoppingListEventType.CREATE_ENTRY -> eventListeners?.created?.invoke(event)
+                    ShoppingListEventType.MOVE_ENTRY -> eventListeners?.moved?.invoke(event)
+                    ShoppingListEventType.DELETE_ENTRY -> eventListeners?.deleted?.invoke(event)
+                    ShoppingListEventType.CHANGED_ENTRY_NAME -> eventListeners?.renamed?.invoke(event)
+                    ShoppingListEventType.MARK_ENTRY_DONE -> eventListeners?.markedAsDone?.invoke(event)
+                    ShoppingListEventType.MARK_ENTRY_TODO -> eventListeners?.markedAsTodo?.invoke(event)
+                }
+            }
+        }
+    }
 
     fun recordEvent(event: ShoppingListEventType, entryId: String, eventState: ShoppingListEventState) {
         recordEvent(event, entryId, eventState, true)
     }
+
     fun recordEvent(event: ShoppingListEventType, entryId: String, eventState: ShoppingListEventState, sendToServer: Boolean) {
         if (list.listId == null) return
 

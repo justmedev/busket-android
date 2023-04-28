@@ -61,7 +61,7 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         feathers.requireConnected {
-            feathers.socket.on("$path ${event.method}") {
+            feathers.socket.on("${path.lowercase()} ${event.method}") {
                 for (res in it) {
                     if (res != null) {
                         var out = JSONObject()

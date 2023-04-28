@@ -98,7 +98,7 @@ class HomeFragment : Fragment() {
 
                     feathers?.service(FeathersSocket.Service.LIST, FeathersSocket.Method.CREATE, listJSON) { data, error ->
                         if (error != null || data == null) return@service
-                        shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data), ::openList))
+                        shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data), ::openList, ::removeListFromLibrary))
                         handler.post {
                             (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toTypedArray()
                             binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(shoppingLists.lastIndex)
@@ -115,6 +115,12 @@ class HomeFragment : Fragment() {
 
     private fun openList(v: View?, list: ShoppingList) {
         findNavController().navigate(R.id.action_HomeFragment_to_DetailedListView, bundleOf("listId" to list.listId))
+    }
+
+    private fun removeListFromLibrary(v: View?, list: ShoppingList) {
+        // feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.REMOVE, list.id)
+        // TODO: Make it possible to delete lists
+        (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists
     }
 
     private fun populateRecyclerView() {
@@ -136,10 +142,10 @@ class HomeFragment : Fragment() {
                 val libraryEntry = array.getJSONObject(i)
 
                 val shoppingList = ShoppingList.fromJSONObject(libraryEntry.getJSONObject("list"))
-                shoppingLists.add(ListOverview(shoppingList, ::openList))
+                shoppingLists.add(ListOverview(shoppingList, ::openList, ::removeListFromLibrary))
 
                 handler.post {
-                    binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(shoppingLists.toTypedArray())
+                    binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(requireContext(), shoppingLists.toTypedArray())
                     binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(i)
 
                     binding.homeListOverviewRecyclerview.visibility = View.VISIBLE

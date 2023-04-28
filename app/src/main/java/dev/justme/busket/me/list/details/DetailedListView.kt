@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
+import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONObject
@@ -48,11 +49,11 @@ class DetailedListView : Fragment() {
     private fun loadListFromRemote(cb: () -> Unit) {
         val query = JSONObject()
         query.put("listid", listId)
-        feathers.service(FeathersSocket.Service.LIST, FeathersSocket.Method.FIND, query) { data, err ->
-            if (data == null || err != null) return@service
+        feathers.service(FeathersService.Service.LIST).find(query) { data, err ->
+            if (data == null || err != null) return@find
 
             val arr = data.getJSONArray(FeathersSocket.ARRAY_DATA_KEY)
-            if (arr.length() <= 0) return@service // TODO TRIGGER NOT FOUND
+            if (arr.length() <= 0) return@find // TODO TRIGGER NOT FOUND
 
             list = ShoppingList.fromJSONObject(arr.getJSONObject(0))
             handler.post {

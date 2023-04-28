@@ -56,7 +56,35 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
         emit(Method.GET, arrayOf(null, query), cb)
     }
 
-    fun on() {}
+    fun on(
+        event: SocketEventListener,
+        callback: (data: JSONObject?, error: SocketError?) -> Unit
+    ) {
+        feathers.requireConnected {
+            feathers.socket.on("$path ${event.method}") {
+                for (res in it) {
+                    if (res != null) {
+                        var out = JSONObject()
+                        var statusCode = 200
+
+                        if (res is JSONObject) {
+                            out = res
+                            if (res.has("code")) statusCode = res.getInt("code")
+                        } else if (res is JSONArray) {
+                            out = JSONObject().put("arrayData", res)
+                        }
+
+                        if (feathers.isSuccessCode(statusCode)) {
+                            callback.invoke(out, null)
+                        } else {
+                            val errorObj = feathers.gson.fromJson(res.toString(), SocketError::class.java)
+                            callback.invoke(null, errorObj)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Emit an event via socket

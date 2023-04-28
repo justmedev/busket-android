@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Looper
 import android.util.Log
 import com.google.gson.annotations.SerializedName
+import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import org.json.JSONArray
@@ -12,30 +13,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-
-
-/*
-export interface EventData {
-  event: EventType,
-  entryId: string,
-  sender?: string,
-  isoDate: string,
-  state: {
-    name: string,
-    /**
-     * @deprecated done is deprecated since 23.11.2022. Just emit with {@link EventType} set to {@link EventType.MARK_ENTRY_DONE} or {@link EventType.MARK_ENTRY_TODO}
-     */
-    done?: boolean,
-    oldIndex?: number,
-    newIndex?: number,
-  },
-}
-
-export interface LogEvent {
-  listid: string,
-  eventData: EventData
-}
- */
 
 enum class ShoppingListEventType(name: String) {
     @SerializedName("MOVE_ENTRY")
@@ -151,10 +128,10 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
     fun sendEventsToServer() {
         val curHandling = eventQueue.toMutableList()
         eventQueue.clear()
-        feathers.service(FeathersSocket.Service.EVENT, FeathersSocket.Method.CREATE, JSONArray(feathers.gson.toJson(curHandling))) { data, err ->
+        feathers.service(FeathersService.Service.EVENT).create(JSONArray(feathers.gson.toJson(curHandling))) { data, err ->
             if (data == null || err != null) {
                 eventQueue.addAll(curHandling)
-                return@service
+                return@create
             }
         }
     }

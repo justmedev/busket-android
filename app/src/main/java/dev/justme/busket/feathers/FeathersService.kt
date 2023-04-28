@@ -29,6 +29,10 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
         AUTHENTICATION("authentication"),
     }
 
+    fun create(data: JSONArray,  cb: FeathersCallback) {
+        emit(Method.CREATE, arrayOf(data), cb)
+    }
+
     fun create(data: JSONObject,  cb: FeathersCallback) {
         emit(Method.CREATE, arrayOf(data), cb)
     }

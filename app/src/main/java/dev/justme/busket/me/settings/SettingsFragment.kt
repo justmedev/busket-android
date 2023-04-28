@@ -9,6 +9,7 @@ import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentSettingsBinding
+import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import org.json.JSONObject
 
@@ -39,7 +40,7 @@ class SettingsFragment : Fragment() {
         }
 
         binding.deleteAccountBtn.setOnClickListener {
-            feathers.service(FeathersSocket.Service.USERS, FeathersSocket.Method.REMOVE, JSONObject()) { data, err ->
+            feathers.service(FeathersService.Service.USERS).remove(JSONObject()) { _, err ->
                 if (err != null) {
                     MaterialAlertDialogBuilder(requireContext()).setCancelable(false).setTitle(R.string.unexpected_error).setMessage(R.string.error_deleting_user).setPositiveButton(R.string.ok) { dialog, _ ->
                         dialog.dismiss()

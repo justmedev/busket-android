@@ -45,7 +45,12 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
         emit(Method.GET, arrayOf(id), cb)
     }
 
-    fun remove() {}
+    fun remove(id: Int, cb: FeathersCallback) {
+        emit(Method.REMOVE, arrayOf(id), cb)
+    }
+    fun remove(query: JSONObject?, cb: FeathersCallback) {
+        emit(Method.GET, arrayOf(null, query), cb)
+    }
 
     fun on() {}
 

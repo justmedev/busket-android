@@ -16,7 +16,6 @@ import io.socket.client.Socket
 import io.socket.engineio.client.transports.WebSocket
 import org.json.JSONArray
 import org.json.JSONObject
-import kotlin.reflect.typeOf
 
 
 data class SocketError(
@@ -47,6 +46,7 @@ class FeathersSocket(private val context: Context) {
     var user: User? = null
     //endregions
 
+    // FIXME: REMOVE ONCE NEW SERVICE IS USED EVERYWHERE
     enum class Method {
         FIND, GET, CREATE, UPDATE, PATCH, REMOVE
     }
@@ -230,7 +230,15 @@ class FeathersSocket(private val context: Context) {
     }
     //endregion
 
-    //region authentication
+    fun service(path: FeathersService.Service): FeathersService {
+        return FeathersService(this, path)
+    }
+
+    fun service(path: String): FeathersService {
+        return FeathersService(this, path)
+    }
+
+    // region authentication
     fun authenticate(
         email: String,
         password: String,

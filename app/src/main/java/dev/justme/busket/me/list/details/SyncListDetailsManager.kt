@@ -81,7 +81,7 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
         eventListenerAttached = true
         eventListeners = listeners
 
-        feathers.on(FeathersSocket.Service.EVENT, FeathersSocket.SocketEventListener.CREATED) { data, err ->
+        feathers.service(FeathersService.Service.EVENT).on(FeathersService.SocketEventListener.CREATED) { data, err ->
             if (err != null) return@on // TODO: Handle error
             val event: ShoppingListEvent = feathers.gson.fromJson(data.toString(), ShoppingListEvent::class.java)
 

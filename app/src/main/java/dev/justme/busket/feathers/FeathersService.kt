@@ -4,7 +4,7 @@ import io.socket.client.Ack
 import org.json.JSONArray
 import org.json.JSONObject
 
-typealias FeathersCallback = (data: JSONObject?, error: SocketError?) -> Unit;
+typealias FeathersCallback = ((data: JSONObject?, error: SocketError?) -> Unit)?
 
 class FeathersService(private val feathers: FeathersSocket, val path: String) {
     constructor(feathers: FeathersSocket, path: Service) : this(feathers, path.toString())
@@ -101,11 +101,11 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
                         }
                         if (!feathers.isSuccessCode(statusCode)) {
                             val errorObj = feathers.gson.fromJson(res.toString(), SocketError::class.java)
-                            callback.invoke(null, errorObj)
+                            callback?.invoke(null, errorObj)
                             return@Ack
                         }
 
-                        callback.invoke(out, null)
+                        callback?.invoke(out, null)
                         return@Ack
                     }
                 }

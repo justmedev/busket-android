@@ -1,17 +1,16 @@
 package dev.justme.busket.auth
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.text.Editable
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentRegisterBinding
+import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import org.json.JSONObject
 import java.util.UUID
@@ -49,16 +48,7 @@ class RegisterFragment : Fragment() {
 
                 binding.registerRegisterButton.isEnabled = false
                 binding.registerLoginButton.isEnabled = false
-                val handler = Handler(Looper.getMainLooper())
-
-                val feathersSocket = FeathersSocket.getInstance(requireContext())
-
-                /*val obj = feathersSocket.packData(object {
-                    val uuid = UUID.randomUUID().toString()
-                    val fullName = binding.registerNameInput.text.toString()
-                    val email = binding.registerEmailInput.text.toString()
-                    val password = binding.registerPasswordInput.text.toString()
-                })*/
+                val feathers = FeathersSocket.getInstance(requireContext())
 
                 val obj = mapOf(
                     "uuid" to UUID.randomUUID().toString(),
@@ -67,14 +57,10 @@ class RegisterFragment : Fragment() {
                     "password" to binding.registerPasswordInput.text.toString(),
                 )
 
-                feathersSocket.service(
-                    "users",
-                    FeathersSocket.Method.CREATE,
-                    JSONObject(obj)
-                ) { json, error ->
+                feathers.service(FeathersService.Service.USERS).create(JSONObject(obj)) { json, error ->
                     if (error != null) {
                         Log.d("Busket RegisterFragment", "user::create error")
-                        return@service
+                        return@create
                     }
                     Log.d("Busket RegisterFragment", "user::create success")
                 }

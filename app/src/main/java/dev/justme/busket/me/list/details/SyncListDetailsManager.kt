@@ -12,7 +12,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import java.util.logging.Handler
 
 
 /*
@@ -110,8 +109,15 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
             val event: ShoppingListEvent = feathers.gson.fromJson(data.toString(), ShoppingListEvent::class.java)
 
             Log.d("SyncListDetailsManager Event", "${event.eventData.event} executed by ${event.eventData.sender} at ${event.eventData.isoDate} on entry ${event.eventData.entryId}")
-            if (event.listid != list.listId) // Event was for other list (not the one we are on)
-            if (event.eventData.sender == sessionUUID) return@on // Events this client has sent are already handled
+            if (event.listid != list.listId) {
+                Log.d("SyncListDetailsManager Event", "${event.eventData.event} is being ignored because it wasn't for the currently open list!")
+                return@on// Event was for other list (not the one we are on)}
+            }
+
+            if (event.eventData.sender == sessionUUID) {
+                Log.d("SyncListDetailsManager Event", "${event.eventData.event} executed by us on entry ${event.eventData.entryId} is ignored by syncManager because its already handled")
+                return@on
+            }
 
             handler.post {
                 when (event.eventData.event) {

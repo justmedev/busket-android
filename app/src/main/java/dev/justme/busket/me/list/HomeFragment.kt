@@ -22,6 +22,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentHomeBinding
+import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 
@@ -96,8 +97,8 @@ class HomeFragment : Fragment() {
                         emptyList(),
                     ).toJSONObject()
 
-                    feathers?.service(FeathersSocket.Service.LIST, FeathersSocket.Method.CREATE, listJSON) { data, error ->
-                        if (error != null || data == null) return@service
+                    feathers?.service(FeathersService.Service.LIST)?.create(listJSON) { data, error ->
+                        if (error != null || data == null) return@create
                         shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data), ::openList, ::removeListFromLibrary))
                         handler.post {
                             (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toTypedArray()
@@ -128,10 +129,10 @@ class HomeFragment : Fragment() {
         binding.homeListOverviewLoader.visibility = View.VISIBLE
         shoppingLists.clear()
 
-        feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.FIND, null) { data, err ->
+        feathers?.service(FeathersService.Service.LIBRARY)?.find(null) { data, err ->
             if (err != null || data == null) {
                 // Handle error
-                return@service
+                return@find
             }
 
             val array = data.getJSONArray("arrayData")

@@ -108,6 +108,9 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
         feathers.on(FeathersSocket.Service.EVENT, FeathersSocket.SocketEventListener.CREATED) { data, err ->
             if (err != null) return@on // TODO: Handle error
             val event: ShoppingListEvent = feathers.gson.fromJson(data.toString(), ShoppingListEvent::class.java)
+
+            Log.d("SyncListDetailsManager Event", "${event.eventData.event} executed by ${event.eventData.sender} at ${event.eventData.isoDate} on entry ${event.eventData.entryId}")
+            if (event.listid != list.listId) // Event was for other list (not the one we are on)
             if (event.eventData.sender == sessionUUID) return@on // Events this client has sent are already handled
 
             handler.post {

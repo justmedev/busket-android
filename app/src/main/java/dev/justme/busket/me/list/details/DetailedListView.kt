@@ -103,16 +103,16 @@ class DetailedListView : Fragment() {
                         TODO()
                     },
                     {
-                        TODO()
+                        deleteEntry(it.eventData.entryId)
                     },
                     {
-                        TODO()
+                        renameEntry(it.eventData.entryId, it.eventData.state.name, false)
                     },
                     {
-                        onItemCheckStateChange(ListDetailsRecyclerEntry(false, it.eventData.state.name, it.eventData.entryId))
+                        onItemCheckStateChange(ListDetailsRecyclerEntry(false, it.eventData.state.name, it.eventData.entryId), false)
                     },
                     {
-                        onItemCheckStateChange(ListDetailsRecyclerEntry(true, it.eventData.state.name, it.eventData.entryId))
+                        onItemCheckStateChange(ListDetailsRecyclerEntry(true, it.eventData.state.name, it.eventData.entryId), false)
                     },
                 )
             )
@@ -136,6 +136,50 @@ class DetailedListView : Fragment() {
     }
 
     // region handle list events
+    private fun findEntryGlobalById(entryId: String): FoundEntry {
+        val todoListIndex = (binding.todoList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entryId }
+        if (todoListIndex != -1) return FoundEntry(todoListIndex, ListType.TODO)
+
+
+        val doneListIndex = (binding.doneList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entryId }
+        if (doneListIndex != -1) return FoundEntry(doneListIndex, ListType.DONE)
+
+        throw EntryNotFound(entryId)
+    }
+
+    private fun renameEntry(entryId: String, newName: String, recordEvent: Boolean) {
+        val found = findEntryGlobalById(entryId)
+
+        if (found.list == ListType.TODO) {
+            (binding.todoList.adapter as ListDetailsAdapter).entries[found.index].name = newName
+            (binding.todoList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
+
+            return
+        }
+
+        (binding.doneList.adapter as ListDetailsAdapter).entries[found.index].name = newName
+        (binding.doneList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
+
+        if (recordEvent) {
+            val state = ShoppingListEventState(newName, null, null)
+            syncListDetailsManager.recordEvent(ShoppingListEventType.CHANGED_ENTRY_NAME, entryId, state)
+        }
+    }
+
+    private fun deleteEntry(entryId: String) {
+        val found = findEntryGlobalById(entryId)
+
+        if (found.list == ListType.TODO) {
+            (binding.todoList.adapter as ListDetailsAdapter).entries.removeAt(found.index)
+            (binding.todoList.adapter as ListDetailsAdapter).notifyItemRemoved(found.index)
+
+            return
+        }
+
+        (binding.doneList.adapter as ListDetailsAdapter).entries.removeAt(found.index)
+        (binding.doneList.adapter as ListDetailsAdapter).notifyItemRemoved(found.index)
+    }
+
     private fun clearDone() {
         clearDone(true)
     }

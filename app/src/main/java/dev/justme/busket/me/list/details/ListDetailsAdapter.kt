@@ -14,7 +14,7 @@ import java.util.Collections
 typealias ListClickListener = (entry: ListDetailsRecyclerEntry) -> Unit
 typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: Int, toPosition: Int) -> Unit
 
-data class ListDetailsRecyclerEntry(var checked: Boolean, val name: String, val id: String)
+data class ListDetailsRecyclerEntry(var checked: Boolean, var name: String, val id: String)
 
 
 class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMoved: ItemMovedListener, val onItemClicked: ListClickListener, val showItemHandle: Boolean) :

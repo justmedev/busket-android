@@ -9,12 +9,10 @@ import com.google.gson.Gson
 import dev.justme.busket.feathers.responses.AuthenticationSuccessResponse
 import dev.justme.busket.feathers.responses.User
 import dev.justme.busket.helpers.SingletonHolder
-import io.socket.client.Ack
 import io.socket.client.IO
 import io.socket.client.Manager
 import io.socket.client.Socket
 import io.socket.engineio.client.transports.WebSocket
-import org.json.JSONArray
 import org.json.JSONObject
 
 
@@ -45,27 +43,6 @@ class FeathersSocket(private val context: Context) {
     val socket: Socket = IO.socket("http://localhost:3030", options)
     var user: User? = null
     //endregions
-
-    // FIXME: REMOVE ONCE NEW SERVICE IS USED EVERYWHERE
-    enum class Method {
-        FIND, GET, CREATE, UPDATE, PATCH, REMOVE
-    }
-
-    enum class SocketEventListener(val method: String) {
-        CREATED("created"),
-        UPDATED("updated"),
-        PATCHED("patched"),
-        REMOVED("removed"),
-    }
-
-    enum class Service(val path: String) {
-        EVENT("event"),
-        LIST("list"),
-        LIBRARY("library"),
-        WHITELISTED_USERS("whitelisted-users"),
-        USERS("users"),
-        AUTHENTICATION("authentication"),
-    }
 
     //region connection
     private fun connect(connectedCallback: (() -> Unit)?) {
@@ -112,124 +89,6 @@ class FeathersSocket(private val context: Context) {
         return code == 2
     }
 
-    fun service(
-        name: Service,
-        method: Method,
-        data: String,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name.path, method.toString(), JSONObject(data), callback)
-    }
-
-    fun service(
-        name: Service,
-        method: Method,
-        data: JSONArray,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name.path, method.toString(), data, callback)
-    }
-
-    fun service(
-        name: String,
-        method: Method,
-        data: JSONArray,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name, method.toString(), data, callback)
-    }
-
-    fun service(
-        name: Service,
-        method: Method,
-        data: JSONObject,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name.path, method.toString(), data, callback)
-    }
-
-    fun service(
-        name: String,
-        method: Method,
-        data: JSONObject,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name, method.toString(), data, callback)
-    }
-
-    fun service(
-        name: Service,
-        method: Method,
-        data: Any?,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name.toString(), method.toString(), data, callback)
-    }
-
-    fun service(
-        name: String,
-        method: Method,
-        data: Any?,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        service(name, method.toString(), data, callback)
-    }
-
-    private fun service(
-        name: String,
-        method: String,
-        data: Any?,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        if (data !is JSONArray && data !is JSONObject && data !is String && data != null) {
-            throw Exception("data can either be JSONARRAY, JSONOBJECT or String! Cannot be of type ${data::class.java.typeName}")
-        }
-
-        requireConnected {
-            socket.emit(method.lowercase(), name.lowercase(), data ?: JSONObject(), Ack {
-                var foundResponse = false
-                for (res in it) {
-                    if (res != null) {
-                        foundResponse = true
-
-                        var out = JSONObject()
-                        var statusCode = 200
-                        if (res is JSONObject) {
-                            out = res
-                            if (res.has("code")) statusCode = res.getInt("code")
-                        } else if (res is JSONArray) {
-                            out = JSONObject().put("arrayData", res)
-                        }
-                        if (!isSuccessCode(statusCode)) {
-                            val errorObj = gson.fromJson(res.toString(), SocketError::class.java)
-                            callback.invoke(null, errorObj)
-                            return@Ack
-                        }
-
-                        callback.invoke(out, null)
-                        return@Ack
-                    }
-                }
-
-                if (!foundResponse) {
-                    callback.invoke(
-                        null,
-                        SocketError(
-                            "Unknown error",
-                            "An unknown networking error occurred",
-                            -1,
-                            "",
-                            null,
-                            null
-                        )
-                    )
-                    return@Ack
-                }
-            })
-        }
-    }
-    //endregion
-
     fun service(path: FeathersService.Service): FeathersService {
         return FeathersService(this, path)
     }
@@ -237,6 +96,7 @@ class FeathersSocket(private val context: Context) {
     fun service(path: String): FeathersService {
         return FeathersService(this, path)
     }
+    //endregion
 
     // region authentication
     fun authenticate(
@@ -271,10 +131,10 @@ class FeathersSocket(private val context: Context) {
         jData.put("email", email)
         jData.put("password", password)
 
-        service(Service.AUTHENTICATION, Method.CREATE, jData) { data, err ->
+        service(FeathersService.Service.AUTHENTICATION).create(jData) { data, err ->
             if (err != null) {
                 errorCallback?.invoke(err)
-                return@service
+                return@create
             }
 
             val auth = gson.fromJson(
@@ -297,10 +157,10 @@ class FeathersSocket(private val context: Context) {
             jData.put("strategy", "jwt")
             jData.put("accessToken", storedAccessToken)
 
-            service(Service.AUTHENTICATION, Method.CREATE, jData) { data, err ->
+            service(FeathersService.Service.AUTHENTICATION).create(jData) { data, err ->
                 if (err != null) {
                     errorCallback?.invoke(err)
-                    return@service
+                    return@create
                 }
 
                 val auth = gson.fromJson(
@@ -348,41 +208,8 @@ class FeathersSocket(private val context: Context) {
         getEncryptedSharedPreferences().edit().putString("access_token", null).apply()
 
         requireConnected {
-            service(Service.AUTHENTICATION, Method.REMOVE, JSONObject()) { _, _ -> }
+            service(FeathersService.Service.AUTHENTICATION).remove(JSONObject(), null)
         }
     }
     //endregion
-
-    // region event listeners
-    fun on(
-        service: Service,
-        event: SocketEventListener,
-        callback: (data: JSONObject?, error: SocketError?) -> Unit
-    ) {
-        requireConnected {
-            socket.on("${service.path} ${event.method}") {
-                for (res in it) {
-                    if (res != null) {
-                        var out = JSONObject()
-                        var statusCode = 200
-
-                        if (res is JSONObject) {
-                            out = res
-                            if (res.has("code")) statusCode = res.getInt("code")
-                        } else if (res is JSONArray) {
-                            out = JSONObject().put("arrayData", res)
-                        }
-
-                        if (isSuccessCode(statusCode)) {
-                            callback.invoke(out, null)
-                        } else {
-                           val errorObj = gson.fromJson(res.toString(), SocketError::class.java)
-                            callback.invoke(null, errorObj)
-                        }
-                    }
-                }
-            }
-        }
-    }
-    // endregion event listeners
 }

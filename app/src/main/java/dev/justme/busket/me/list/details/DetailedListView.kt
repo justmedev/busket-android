@@ -100,7 +100,12 @@ class DetailedListView : Fragment() {
                         createEntry(it.eventData.state.name, it.eventData.entryId, false)
                     },
                     {
-                        TODO()
+                        val entry = findEntryGlobalById(it.eventData.entryId)
+                        if (entry.list == ListType.TODO) {
+                            (binding.todoList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
+                        } else {
+                            (binding.doneList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
+                        }
                     },
                     {
                         deleteEntry(it.eventData.entryId)

@@ -52,6 +52,9 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {
+        onRowMoved(fromPosition, toPosition, true)
+    }
+    fun onRowMoved(fromPosition: Int, toPosition: Int, invokeEventListener: Boolean) {
         if (fromPosition < toPosition) {
             for (i in fromPosition until toPosition) {
                 Collections.swap(entries, i, i + 1)
@@ -62,7 +65,7 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
             }
         }
         notifyItemMoved(fromPosition, toPosition)
-        onItemMoved.invoke(entries[toPosition], fromPosition, toPosition)
+        if (invokeEventListener) onItemMoved.invoke(entries[toPosition], fromPosition, toPosition)
     }
 
     override fun onRowSelected(viewHolder: ListDetailsHolder?) {

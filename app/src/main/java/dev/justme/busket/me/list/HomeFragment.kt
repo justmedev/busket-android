@@ -25,6 +25,7 @@ import dev.justme.busket.databinding.FragmentHomeBinding
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
+import org.json.JSONObject
 
 
 class HomeFragment : Fragment() {
@@ -32,7 +33,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private var feathers: FeathersSocket? = null
     private val handler = Handler(Looper.getMainLooper())
-    private val shoppingLists = emptyList<ListOverview>().toMutableList()
+    private val shoppingLists = emptyList<ShoppingList>().toMutableList()
 
 
     override fun onCreateView(
@@ -90,6 +91,7 @@ class HomeFragment : Fragment() {
 
                     val listJSON = ShoppingList(
                         null,
+                        null,
                         createListName.text.trim().toString(),
                         createListDescription.text.trim().toString(),
                         null,
@@ -99,9 +101,9 @@ class HomeFragment : Fragment() {
 
                     feathers?.service(FeathersService.Service.LIST)?.create(listJSON) { data, error ->
                         if (error != null || data == null) return@create
-                        shoppingLists.add(ListOverview(ShoppingList.fromJSONObject(data), ::openList, ::removeListFromLibrary))
+                        shoppingLists.add(ShoppingList.fromJSONObject(data))
                         handler.post {
-                            (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toTypedArray()
+                            (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toMutableList()
                             binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(shoppingLists.lastIndex)
                         }
                     }
@@ -114,14 +116,41 @@ class HomeFragment : Fragment() {
         alertDialog?.show()
     }
 
-    private fun openList(v: View?, list: ShoppingList) {
+    private fun openList(v: View?, list: ShoppingList, position: Int) {
         findNavController().navigate(R.id.action_HomeFragment_to_DetailedListView, bundleOf("listId" to list.listId))
     }
 
-    private fun removeListFromLibrary(v: View?, list: ShoppingList) {
-        // feathers?.service(FeathersSocket.Service.LIBRARY, FeathersSocket.Method.REMOVE, list.id)
-        // TODO: Make it possible to delete lists
-        (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists
+    private fun removeListFromLibrary(v: View?, list: ShoppingList, position: Int) {
+        if (list.id == null) return
+
+        val loadingDialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.loading).setView(R.layout.dialog_loading).show()
+
+        fun success() {
+            handler.post {
+                loadingDialog.dismiss()
+
+                (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists.removeAt(position)
+                (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).notifyItemRemoved(position)
+            }
+        }
+
+        if (list.owner == feathers?.user?.uuid) {
+            feathers?.service(FeathersService.Service.LIST)?.remove(list.id) { data, error ->
+                if (error != null || data == null) return@remove
+
+                success()
+            }
+            return
+        }
+
+        val query = JSONObject()
+        query.put("user", feathers?.user?.uuid)
+        query.put("listId", list.listId)
+        feathers?.service(FeathersService.Service.WHITELISTED_USERS)?.remove(query) { data, error ->
+            if (error != null || data == null) return@remove
+
+            success()
+        }
     }
 
     private fun populateRecyclerView() {
@@ -143,10 +172,10 @@ class HomeFragment : Fragment() {
                 val libraryEntry = array.getJSONObject(i)
 
                 val shoppingList = ShoppingList.fromJSONObject(libraryEntry.getJSONObject("list"))
-                shoppingLists.add(ListOverview(shoppingList, ::openList, ::removeListFromLibrary))
+                shoppingLists.add(shoppingList)
 
                 handler.post {
-                    binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(requireContext(), shoppingLists.toTypedArray())
+                    binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(requireContext(), shoppingLists.toMutableList(), ::openList, ::removeListFromLibrary)
                     binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(i)
 
                     binding.homeListOverviewRecyclerview.visibility = View.VISIBLE

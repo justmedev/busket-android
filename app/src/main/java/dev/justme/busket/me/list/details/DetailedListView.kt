@@ -16,6 +16,7 @@ import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.RecyclerView
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
@@ -38,6 +39,7 @@ class DetailedListView : Fragment() {
     private var list: ShoppingList? = null
     private lateinit var feathers: FeathersSocket
     private lateinit var syncListDetailsManager: SyncListDetailsManager
+    private lateinit var itemTouchHelper: ItemTouchHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -86,8 +88,13 @@ class DetailedListView : Fragment() {
             clearDone()
         }
 
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, true)
-        ItemTouchHelper(ItemMoveCallback(adapter)).attachToRecyclerView(binding.todoList)
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, true, object : StartDragListener {
+            override fun requestDrag(viewHolder: RecyclerView.ViewHolder) {
+                itemTouchHelper.startDrag(viewHolder)
+            }
+        })
+        itemTouchHelper = ItemTouchHelper(ItemMoveCallback(adapter))
+        itemTouchHelper.attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
 
         binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, false)

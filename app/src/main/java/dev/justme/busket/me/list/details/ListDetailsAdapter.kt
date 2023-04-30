@@ -1,6 +1,8 @@
 package dev.justme.busket.me.list.details
 
+import android.annotation.SuppressLint
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
@@ -17,15 +19,28 @@ typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: In
 data class ListDetailsRecyclerEntry(var checked: Boolean, var name: String, val id: String)
 
 
-class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMoved: ItemMovedListener, val onItemClicked: ListClickListener, val showItemHandle: Boolean) :
+class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMoved: ItemMovedListener, val onItemClicked: ListClickListener, val showItemHandle: Boolean, val startDragListener: StartDragListener?) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
+
+    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemClicked: ListClickListener, showItemHandle: Boolean) : this(entries, onItemMoved, onItemClicked, showItemHandle, null)
+
     class ListDetailsHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val checkBox: CheckBox = itemView.findViewById(R.id.listDetailsItemCheck)
         private val handle: ImageView = itemView.findViewById(R.id.listDetailsItemHandle)
         val card: MaterialCardView = itemView.findViewById(R.id.listDetailsCard)
 
-        fun bind(entry: ListDetailsRecyclerEntry, onClick: ListClickListener, showHandle: Boolean) {
+        @SuppressLint("ClickableViewAccessibility")
+        fun bind(entry: ListDetailsRecyclerEntry, onClick: ListClickListener, showHandle: Boolean, startDragListener: StartDragListener?, holder: ListDetailsHolder) {
             if (!showHandle) handle.visibility = View.GONE;
+            else {
+                handle.setOnTouchListener { _, e ->
+                    if (e.action == MotionEvent.ACTION_DOWN) {
+                        startDragListener?.requestDrag(holder)
+                    }
+                    false
+                }
+            }
+
             checkBox.text = entry.name
             checkBox.isChecked = entry.checked
             checkBox.setOnClickListener {
@@ -48,7 +63,7 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
 
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
-        holder.bind(item, onItemClicked, showItemHandle)
+        holder.bind(item, onItemClicked, showItemHandle, startDragListener, holder)
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {

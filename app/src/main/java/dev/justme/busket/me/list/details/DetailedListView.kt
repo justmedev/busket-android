@@ -11,12 +11,15 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import androidx.core.os.bundleOf
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
@@ -271,7 +274,9 @@ class DetailedListView : Fragment() {
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 if (menuItem.itemId == R.id.action_manage_whitelisted) {
-                    //FIXME: Open Dialog for managing whitelisted users
+                    if (list == null) return false
+                    findNavController().navigate(R.id.action_DetailedListView_to_WhitelistedUsersFragment, bundleOf("listId" to list?.listId))
+                    return true
                 }
                 return false
             }

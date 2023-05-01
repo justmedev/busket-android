@@ -41,4 +41,6 @@
     <string name="delete_all_done_items">Delete all done items</string>
     <string name="clear">Clear</string>
     <string name="delete_or_leave_list">Delete or leave list</string>
+    <string name="rename_entry">Rename Entry</string>
+    <string name="name_too_short">Name too short</string>
 </resources>

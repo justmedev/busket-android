@@ -11,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
+import android.widget.EditText
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -20,6 +21,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
+import com.google.android.material.snackbar.Snackbar
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
@@ -91,7 +94,7 @@ class DetailedListView : Fragment() {
             clearDone()
         }
 
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, true, object : StartDragListener {
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, object : StartDragListener {
             override fun requestDrag(viewHolder: RecyclerView.ViewHolder) {
                 itemTouchHelper.startDrag(viewHolder)
             }
@@ -100,7 +103,7 @@ class DetailedListView : Fragment() {
         itemTouchHelper.attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
 
-        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, false)
+        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false)
 
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
@@ -161,6 +164,28 @@ class DetailedListView : Fragment() {
         if (doneListIndex != -1) return FoundEntry(doneListIndex, ListType.DONE)
 
         throw EntryNotFound(entryId)
+    }
+
+    private fun onItemLongPress(entry: ListDetailsRecyclerEntry) {
+        val textInput = EditText(requireContext())
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.rename_entry)
+            .setView(textInput)
+            .setPositiveButton(R.string.ok) { d, _ ->
+                val newName = textInput.text.toString()
+                if (newName.isEmpty()) {
+                    Snackbar.make(binding.root, R.string.name_too_short, LENGTH_SHORT).show()
+                    return@setPositiveButton
+                }
+
+                renameEntry(entry.id, newName, true)
+                d.dismiss()
+            }
+            .setNegativeButton(R.string.cancel) { d, _ ->
+                d.dismiss()
+            }
+            .show()
     }
 
     private fun renameEntry(entryId: String, newName: String, recordEvent: Boolean) {

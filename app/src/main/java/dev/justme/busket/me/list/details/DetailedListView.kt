@@ -1,6 +1,7 @@
 package dev.justme.busket.me.list.details
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -10,7 +11,11 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -170,7 +175,7 @@ class DetailedListView : Fragment() {
         val inflater = requireActivity().layoutInflater
         val dialogView = DialogRenameEntryBinding.inflate(inflater)
 
-        MaterialAlertDialogBuilder(requireContext())
+        val window = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.rename_entry)
             .setView(dialogView.root)
             .setPositiveButton(R.string.ok) { d, _ ->
@@ -185,8 +190,10 @@ class DetailedListView : Fragment() {
             }
             .setNegativeButton(R.string.cancel) { d, _ ->
                 d.dismiss()
-            }
-            .show()
+            }.show().window
+
+        window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+        window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
     }
 
     private fun renameEntry(entryId: String, newName: String, recordEvent: Boolean) {

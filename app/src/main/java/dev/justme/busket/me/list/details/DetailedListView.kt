@@ -195,12 +195,10 @@ class DetailedListView : Fragment() {
         if (found.list == ListType.TODO) {
             (binding.todoList.adapter as ListDetailsAdapter).entries[found.index].name = newName
             (binding.todoList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
-
-            return
+        } else {
+            (binding.doneList.adapter as ListDetailsAdapter).entries[found.index].name = newName
+            (binding.doneList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
         }
-
-        (binding.doneList.adapter as ListDetailsAdapter).entries[found.index].name = newName
-        (binding.doneList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
 
         if (recordEvent) {
             val state = ShoppingListEventState(newName, null, null)

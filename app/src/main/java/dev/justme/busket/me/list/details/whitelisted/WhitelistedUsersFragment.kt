@@ -181,6 +181,9 @@ class WhitelistedUsersFragment : Fragment() {
                     setDialogLoading(false)
                     d.dismiss()
                 }
+                .setOnDismissListener {
+                    setDialogLoading(false)
+                }
                 .show()
         }
     }

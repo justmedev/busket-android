@@ -111,7 +111,7 @@ class WhitelistedUsersFragment : Fragment() {
 
         val tmpPermissions = WhitelistedUserPermissions(user.canEditEntries, user.canDeleteEntries)
 
-        MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.permission_setting_title).setView(dialogView.root)
+        MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.permission_setting_title, user.email)).setView(dialogView.root)
             .setPositiveButton(R.string.save) { d, _ ->
                 dialogView.loadingPermissions.root.visibility = View.VISIBLE
 
@@ -125,10 +125,12 @@ class WhitelistedUsersFragment : Fragment() {
                     user.canEditEntries = tmpPermissions.canEditEntries
                     user.canDeleteEntries = tmpPermissions.canDeleteEntries
 
-                    (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(position)
+                    mainThread.post {
+                        (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(position)
 
-                    dialogView.loadingPermissions.root.visibility = View.GONE
-                    d.dismiss()
+                        dialogView.loadingPermissions.root.visibility = View.GONE
+                        d.dismiss()
+                    }
                 }
             }
             .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }

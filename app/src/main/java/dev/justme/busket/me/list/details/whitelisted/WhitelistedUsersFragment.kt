@@ -137,13 +137,17 @@ class WhitelistedUsersFragment : Fragment() {
             .show()
 
         dialogView.canEditEntriesCheckbox.isChecked = tmpPermissions.canEditEntries
-        dialogView.canEditEntriesCheckbox.setOnClickListener {
+        dialogView.canEditEntriesCheckbox.setOnClickListener { tmpPermissions.canEditEntries = !tmpPermissions.canEditEntries }
+        dialogView.canEditEntriesContainer.setOnClickListener {
             tmpPermissions.canEditEntries = !tmpPermissions.canEditEntries
+            dialogView.canEditEntriesCheckbox.isChecked = tmpPermissions.canEditEntries
         }
 
         dialogView.canDeleteEntriesCheckbox.isChecked = tmpPermissions.canDeleteEntries
-        dialogView.canDeleteEntriesCheckbox.setOnClickListener {
+        dialogView.canDeleteEntriesCheckbox.setOnClickListener { tmpPermissions.canDeleteEntries = !tmpPermissions.canDeleteEntries }
+        dialogView.canDeleteEntriesContainer.setOnClickListener {
             tmpPermissions.canDeleteEntries = !tmpPermissions.canDeleteEntries
+            dialogView.canDeleteEntriesCheckbox.isChecked = tmpPermissions.canDeleteEntries
         }
     }
 

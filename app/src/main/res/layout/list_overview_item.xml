@@ -35,7 +35,8 @@
                 android:text="@string/loading" />
         </LinearLayout>
 
-        <ImageButton
+        <Button
+            style="@style/Widget.Material3.Button.IconButton"
             android:id="@+id/list_item_remove_from_library"
             android:layout_width="28dp"
             android:layout_height="28dp"

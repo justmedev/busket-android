@@ -28,6 +28,7 @@ import dev.justme.busket.R
 import dev.justme.busket.databinding.DialogWithTextfieldBinding
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
 import dev.justme.busket.feathers.FeathersService
+import dev.justme.busket.feathers.FeathersService.Companion.ARRAY_DATA_KEY
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
 import dev.justme.busket.me.list.details.whitelisted.WhitelistedUser
@@ -77,13 +78,15 @@ class DetailedListView : Fragment() {
         }
     }
 
-    private fun loadWhitelistedUserFromRemote() {
+    private fun loadWhitelistedUserFromRemote(cb: () -> Unit) {
         val query = JSONObject()
         query.put("listId", listId)
 
         feathers.service(FeathersService.Service.WHITELISTED_USERS).find(query) { data, err ->
             if (data == null || err != null) return@find
-            whitelistedUser = WhitelistedUser.fromJSON(data)
+            whitelistedUser = WhitelistedUser.fromJSONArray(data.getJSONArray(ARRAY_DATA_KEY))[0]
+
+            handler.post(cb)
         }
     }
 
@@ -110,8 +113,7 @@ class DetailedListView : Fragment() {
         binding.clearBtn.setOnClickListener {
             clearDone()
         }
-
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, permissions, object : StartDragListener {
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, permissions, ::viewHolderBound, object : StartDragListener {
             override fun requestDrag(viewHolder: RecyclerView.ViewHolder) {
                 itemTouchHelper.startDrag(viewHolder)
             }
@@ -120,11 +122,10 @@ class DetailedListView : Fragment() {
         itemTouchHelper.attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
 
-        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false, permissions)
-
-        loadWhitelistedUserFromRemote()
+        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false, permissions, ::viewHolderBound)
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
+
             syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
             syncListDetailsManager.registerEventListener(
                 ShoppingListEventListeners(
@@ -173,6 +174,10 @@ class DetailedListView : Fragment() {
             if (err != null || data == null) return@on
 
             whitelistedUser = WhitelistedUser.fromJSON(data)
+            handler.post {
+                (binding.todoList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
+                (binding.doneList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
+            }
         }
 
         feathers.service(FeathersService.Service.WHITELISTED_USERS).on(FeathersService.SocketEventListener.REMOVED) { data, err ->
@@ -183,6 +188,13 @@ class DetailedListView : Fragment() {
         }
 
         return binding.root;
+    }
+
+    private fun viewHolderBound(holder: ListDetailsAdapter.ListDetailsHolder) {
+        loadWhitelistedUserFromRemote {
+            (binding.todoList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
+            (binding.doneList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
+        }
     }
 
     // region handle list events
@@ -295,6 +307,7 @@ class DetailedListView : Fragment() {
     }
 
     private fun onItemCheckStateChange(entry: ListDetailsRecyclerEntry) {
+        if (!permissions.canEditEntries) return
         onItemCheckStateChange(entry, true)
     }
 

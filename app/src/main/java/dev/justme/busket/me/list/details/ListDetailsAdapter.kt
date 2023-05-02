@@ -17,13 +17,15 @@ typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: In
 data class ListDetailsRecyclerEntry(var checked: Boolean, var name: String, val id: String)
 
 
-class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMove: ItemMovedListener, val onItemCheck: ListClickListener, val onItemLongPress: ListClickListener, val showItemHandle: Boolean, permissions: WhitelistedUserPermissions, val startDragListener: StartDragListener?) :
+class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMove: ItemMovedListener, val onItemCheck: ListClickListener, val onItemLongPress: ListClickListener, val showItemHandle: Boolean, var permissions: WhitelistedUserPermissions, val viewHolderBoundCallback: (holder: ListDetailsHolder) -> Unit, val startDragListener: StartDragListener?) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
 
-    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemCheck: ListClickListener, onItemLongPress: ListClickListener, showItemHandle: Boolean, permissions: WhitelistedUserPermissions)
-            : this(entries, onItemMoved, onItemCheck, onItemLongPress, showItemHandle, permissions, null)
+    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemCheck: ListClickListener, onItemLongPress: ListClickListener, showItemHandle: Boolean, permissions: WhitelistedUserPermissions, viewHolderBoundCallback: (holder: ListDetailsHolder) -> Unit)
+            : this(entries, onItemMoved, onItemCheck, onItemLongPress, showItemHandle, permissions, viewHolderBoundCallback, null)
 
     lateinit var binding: ListDetailsItemBinding
+
+    var viewHolder: ListDetailsHolder? = null
 
     class ListDetailsHolder(binding: ListDetailsItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val checkBox = binding.listDetailsItemCheck
@@ -32,7 +34,7 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
 
 
         @SuppressLint("ClickableViewAccessibility")
-        fun bind(entry: ListDetailsRecyclerEntry, onCheckClick: ListClickListener, onLongClick: ListClickListener, showHandle: Boolean, startDragListener: StartDragListener?, holder: ListDetailsHolder) {
+        fun bind(entry: ListDetailsRecyclerEntry, onCheckClick: ListClickListener, onLongClick: ListClickListener, showHandle: Boolean, permissions: WhitelistedUserPermissions, startDragListener: StartDragListener?, holder: ListDetailsHolder) {
             fun longPressListener(v: View): Boolean {
                 onLongClick.invoke(entry)
                 return true
@@ -55,6 +57,12 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
                 entry.checked = !entry.checked
                 onCheckClick.invoke(entry)
             }
+            permissionsUpdated(permissions)
+        }
+
+        fun permissionsUpdated(permissions: WhitelistedUserPermissions) {
+            checkBox.isEnabled = permissions.canEditEntries
+            handle.visibility = if (permissions.canEditEntries) View.VISIBLE else View.INVISIBLE
         }
     }
 
@@ -69,7 +77,10 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
 
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
-        holder.bind(item, onItemCheck, onItemLongPress, showItemHandle, startDragListener, holder)
+        holder.bind(item, onItemCheck, onItemLongPress, showItemHandle, permissions, startDragListener, holder)
+
+        viewHolder = holder
+        viewHolderBoundCallback.invoke(holder)
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {

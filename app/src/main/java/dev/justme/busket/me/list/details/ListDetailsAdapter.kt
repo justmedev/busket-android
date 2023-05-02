@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import dev.justme.busket.databinding.ListDetailsItemBinding
+import dev.justme.busket.me.list.details.whitelisted.WhitelistedUserPermissions
 import java.util.Collections
 
 
@@ -16,10 +17,11 @@ typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: In
 data class ListDetailsRecyclerEntry(var checked: Boolean, var name: String, val id: String)
 
 
-class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMove: ItemMovedListener, val onItemCheck: ListClickListener, val onItemLongPress: ListClickListener, val showItemHandle: Boolean, val startDragListener: StartDragListener?) :
+class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMove: ItemMovedListener, val onItemCheck: ListClickListener, val onItemLongPress: ListClickListener, val showItemHandle: Boolean, permissions: WhitelistedUserPermissions, val startDragListener: StartDragListener?) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
 
-    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemCheck: ListClickListener, onItemLongPress: ListClickListener, showItemHandle: Boolean) : this(entries, onItemMoved, onItemCheck, onItemLongPress, showItemHandle, null)
+    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemCheck: ListClickListener, onItemLongPress: ListClickListener, showItemHandle: Boolean, permissions: WhitelistedUserPermissions)
+            : this(entries, onItemMoved, onItemCheck, onItemLongPress, showItemHandle, permissions, null)
 
     lateinit var binding: ListDetailsItemBinding
 

@@ -55,6 +55,11 @@ data class WhitelistedUser(
     }
 }
 
+data class WhitelistedUserPermissions(
+    var canEditEntries: Boolean,
+    var canDeleteEntries: Boolean
+)
+
 enum class WhitelistedUserStatus(val localized: String) {
     PENDING_INVITATION(BusketApplication.appResources?.getString(R.string.whitelist_pending_invitation) ?: "error"),
     JOINED(BusketApplication.appResources?.getString(R.string.whitelist_joined) ?: "error"),
@@ -170,11 +175,6 @@ class WhitelistedUsersFragment : Fragment() {
     private fun onUserClick(user: WhitelistedUser, position: Int) {
         val inflater = requireActivity().layoutInflater
         val dialogView = DialogWhitelistedUserSettingsBinding.inflate(inflater)
-
-        data class WhitelistedUserPermissions(
-            var canEditEntries: Boolean,
-            var canDeleteEntries: Boolean
-        )
 
         val tmpPermissions = WhitelistedUserPermissions(user.canEditEntries, user.canDeleteEntries)
 

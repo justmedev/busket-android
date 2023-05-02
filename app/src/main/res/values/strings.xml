@@ -59,4 +59,6 @@
     <string name="permission_setting_can_delete_entries_body">When true, this user can delete entries</string>
     <string name="permission_setting_kick_user">Kick User</string>
     <string name="permission_setting_kick_user_body">This user will no longer be able to access your list until you invite them again!</string>
+    <string name="invite_user">Invite User</string>
+    <string name="invite">Invite</string>
 </resources>

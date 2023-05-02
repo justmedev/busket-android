@@ -1,19 +1,23 @@
 package dev.justme.busket.me.list.details.whitelisted
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import dev.justme.busket.BusketApplication
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
+import dev.justme.busket.databinding.DialogLoadingBinding
 import dev.justme.busket.databinding.DialogWhitelistedUserSettingsBinding
+import dev.justme.busket.databinding.DialogWithTextfieldBinding
 import dev.justme.busket.databinding.FragmentWhitelistedUsersBinding
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersService.Companion.ARRAY_DATA_KEY
@@ -86,6 +90,50 @@ class WhitelistedUsersFragment : Fragment() {
 
         binding.recyclerView.adapter = WhitelistedUsersAdapter(mutableListOf(), ::onUserClick)
         populate()
+
+        binding.inviteUserFab.setOnClickListener {
+            val dialogView = DialogWithTextfieldBinding.inflate(inflater)
+            dialogView.textInput.editText?.hint = getString(R.string.email)
+
+            val dialog = MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.invite_user).setView(dialogView.root)
+                .setPositiveButton(R.string.invite, null)
+                .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }
+                .show()
+
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener {
+                dialogView.textInput.error = null
+                val email = dialogView.textInput.editText?.text.toString()
+
+                if (!email.contains("@") || !email.contains(".")) {
+                    dialogView.textInput.error = "Invalid email!"
+                    return@setOnClickListener
+                }
+
+                val loadingDialog = MaterialAlertDialogBuilder(requireContext())
+                    .setTitle(R.string.loading)
+                    .setView(DialogLoadingBinding.inflate(inflater).root)
+                    .setCancelable(false)
+                    .show()
+
+                val data = JSONObject()
+                data.put("inviteEmail", email)
+                data.put("listId", listId)
+
+                feathers.service(FeathersService.Service.WHITELISTED_USERS).create(data) { res, err ->
+                    if (res == null || err != null) return@create
+                    mainThread.post {
+                        (binding.recyclerView.adapter as WhitelistedUsersAdapter).users.add(WhitelistedUser.fromJSON(res))
+                        (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemInserted((binding.recyclerView.adapter as WhitelistedUsersAdapter).users.size - 1)
+
+                        loadingDialog.dismiss()
+                        dialog.dismiss()
+                    }
+                }
+            }
+
+            dialog.window?.clearFlags(WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM)
+            dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
+        }
 
         (activity as MainActivity).supportActionBar?.title = "Whitelist: $listName"
 
@@ -175,6 +223,7 @@ class WhitelistedUsersFragment : Fragment() {
                     feathers.service(FeathersService.Service.WHITELISTED_USERS).remove(user.id) { data, err ->
                         if (data == null || err != null) return@remove
                         mainThread.post {
+                            (binding.recyclerView.adapter as WhitelistedUsersAdapter).users.removeAt(position)
                             (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemRemoved(position)
 
                             setDialogLoading(false)

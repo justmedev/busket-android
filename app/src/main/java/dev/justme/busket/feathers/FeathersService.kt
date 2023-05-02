@@ -41,9 +41,13 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
         emit(Method.CREATE, arrayOf(data), cb)
     }
 
-    fun update() {}
+    fun update() {
+        throw NotImplementedError("update is not implemented yet.")
+    }
 
-    fun patch() {}
+    fun patch(id: Int, data: JSONObject, cb: FeathersCallback) {
+        emit(Method.PATCH, arrayOf(id, data), cb)
+    }
 
     fun find(query: JSONObject?, cb: FeathersCallback) {
         emit(Method.FIND, arrayOf(query), cb)

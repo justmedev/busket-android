@@ -44,4 +44,7 @@
     <string name="rename_entry">Rename Entry</string>
     <string name="name_too_short">Name too short</string>
     <string name="new_name">New Name</string>
+    <string name="edit_account_permissions">Edit account permissions</string>
+    <string name="whitelist_pending_invitation">Pending invite…</string>
+    <string name="whitelist_joined">Joined</string>
 </resources>

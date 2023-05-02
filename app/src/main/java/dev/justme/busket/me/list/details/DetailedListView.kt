@@ -25,7 +25,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar.LENGTH_SHORT
 import com.google.android.material.snackbar.Snackbar
 import dev.justme.busket.MainActivity
 import dev.justme.busket.R
-import dev.justme.busket.databinding.DialogRenameEntryBinding
+import dev.justme.busket.databinding.DialogWithTextfieldBinding
 import dev.justme.busket.databinding.FragmentDetailedListViewBinding
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
@@ -169,13 +169,13 @@ class DetailedListView : Fragment() {
 
     private fun onItemLongPress(entry: ListDetailsRecyclerEntry) {
         val inflater = requireActivity().layoutInflater
-        val dialogView = DialogRenameEntryBinding.inflate(inflater)
+        val dialogView = DialogWithTextfieldBinding.inflate(inflater)
 
         val window = MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.rename_entry)
             .setView(dialogView.root)
             .setPositiveButton(R.string.ok) { d, _ ->
-                val newName = dialogView.renameEntryTextInput.editText?.text.toString()
+                val newName = dialogView.textInput.editText?.text.toString()
                 if (newName.isEmpty()) {
                     Snackbar.make(binding.root, R.string.name_too_short, LENGTH_SHORT).show()
                     return@setPositiveButton

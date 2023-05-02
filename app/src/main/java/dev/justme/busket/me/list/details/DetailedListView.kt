@@ -65,7 +65,7 @@ class DetailedListView : Fragment() {
         feathers.service(FeathersService.Service.LIST).find(query) { data, err ->
             if (data == null || err != null) return@find
 
-            val arr = data.getJSONArray(FeathersSocket.ARRAY_DATA_KEY)
+            val arr = data.getJSONArray(FeathersService.ARRAY_DATA_KEY)
             if (arr.length() <= 0) return@find // TODO TRIGGER NOT FOUND
 
             list = ShoppingList.fromJSONObject(arr.getJSONObject(0))

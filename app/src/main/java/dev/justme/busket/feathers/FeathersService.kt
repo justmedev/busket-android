@@ -7,7 +7,11 @@ import org.json.JSONObject
 typealias FeathersCallback = ((data: JSONObject?, error: SocketError?) -> Unit)?
 
 class FeathersService(private val feathers: FeathersSocket, val path: String) {
-    constructor(feathers: FeathersSocket, path: Service) : this(feathers, path.toString())
+    constructor(feathers: FeathersSocket, service: Service) : this(feathers, service.path)
+
+    companion object {
+        const val ARRAY_DATA_KEY = "arrayData"
+    }
 
     enum class Method {
         FIND, GET, CREATE, UPDATE, PATCH, REMOVE
@@ -71,7 +75,7 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
                             out = res
                             if (res.has("code")) statusCode = res.getInt("code")
                         } else if (res is JSONArray) {
-                            out = JSONObject().put("arrayData", res)
+                            out = JSONObject().put(ARRAY_DATA_KEY, res)
                         }
 
                         if (feathers.isSuccessCode(statusCode)) {
@@ -125,7 +129,7 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
                             out = res
                             if (res.has("code")) statusCode = res.getInt("code")
                         } else if (res is JSONArray) {
-                            out = JSONObject().put("arrayData", res)
+                            out = JSONObject().put(ARRAY_DATA_KEY, res)
                         }
                         if (!feathers.isSuccessCode(statusCode)) {
                             val errorObj = feathers.gson.fromJson(res.toString(), SocketError::class.java)

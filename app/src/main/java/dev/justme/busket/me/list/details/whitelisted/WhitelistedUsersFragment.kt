@@ -8,9 +8,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import dev.justme.busket.BusketApplication
 import dev.justme.busket.R
+import dev.justme.busket.databinding.DialogWhitelistedUserSettingsBinding
 import dev.justme.busket.databinding.FragmentWhitelistedUsersBinding
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersService.Companion.ARRAY_DATA_KEY
@@ -25,8 +27,8 @@ data class WhitelistedUser(
     val user: String?,
     val listId: String,
     val inviteEmail: String,
-    val canEditEntries: Boolean,
-    val canDeleteEntries: Boolean,
+    var canEditEntries: Boolean,
+    var canDeleteEntries: Boolean,
 ) {
     val status: WhitelistedUserStatus
         get() = if (user == null) WhitelistedUserStatus.PENDING_INVITATION else WhitelistedUserStatus.JOINED
@@ -98,8 +100,49 @@ class WhitelistedUsersFragment : Fragment() {
         }
     }
 
-    private fun onUserClick(user: WhitelistedUser) {
+    private fun onUserClick(user: WhitelistedUser, position: Int) {
+        val inflater = requireActivity().layoutInflater
+        val dialogView = DialogWhitelistedUserSettingsBinding.inflate(inflater)
 
+        data class WhitelistedUserPermissions(
+            var canEditEntries: Boolean,
+            var canDeleteEntries: Boolean
+        )
+
+        val tmpPermissions = WhitelistedUserPermissions(user.canEditEntries, user.canDeleteEntries)
+
+        MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.permission_setting_title).setView(dialogView.root)
+            .setPositiveButton(R.string.save) { d, _ ->
+                dialogView.loadingPermissions.root.visibility = View.VISIBLE
+
+                val patchData = JSONObject()
+                patchData.put("canEditEntries", tmpPermissions.canEditEntries)
+                patchData.put("canDeleteEntries", tmpPermissions.canDeleteEntries)
+
+                feathers.service(FeathersService.Service.WHITELISTED_USERS).patch(user.id, patchData) { data, err ->
+                    if (err != null || data == null) return@patch
+
+                    user.canEditEntries = tmpPermissions.canEditEntries
+                    user.canDeleteEntries = tmpPermissions.canDeleteEntries
+
+                    (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(position)
+
+                    dialogView.loadingPermissions.root.visibility = View.GONE
+                    d.dismiss()
+                }
+            }
+            .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }
+            .show()
+
+        dialogView.canEditEntriesCheckbox.isChecked = tmpPermissions.canEditEntries
+        dialogView.canEditEntriesCheckbox.setOnClickListener {
+            tmpPermissions.canEditEntries = !tmpPermissions.canEditEntries
+        }
+
+        dialogView.canDeleteEntriesCheckbox.isChecked = tmpPermissions.canDeleteEntries
+        dialogView.canDeleteEntriesCheckbox.setOnClickListener {
+            tmpPermissions.canDeleteEntries = !tmpPermissions.canDeleteEntries
+        }
     }
 
     companion object {

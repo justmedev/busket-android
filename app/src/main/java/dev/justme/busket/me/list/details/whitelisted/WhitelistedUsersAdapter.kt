@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import dev.justme.busket.databinding.WhitelistedUsersItemBinding
 
-typealias UserClickListener = (user: WhitelistedUser) -> Unit
+typealias UserClickListener = (user: WhitelistedUser, position: Int) -> Unit
 
 class WhitelistedUsersAdapter(var users: MutableList<WhitelistedUser>, val onUserClick: UserClickListener) :
     RecyclerView.Adapter<WhitelistedUsersAdapter.WhitelistedUsersHolder>() {
@@ -17,12 +17,12 @@ class WhitelistedUsersAdapter(var users: MutableList<WhitelistedUser>, val onUse
         val status = binding.whitelistedUsersStatus
         val editBtn = binding.whitelistedUsersEditButton
 
-        fun bind(user: WhitelistedUser, onClick: UserClickListener) {
+        fun bind(user: WhitelistedUser, position: Int, onClick: UserClickListener) {
             email.text = user.email
             status.text = user.status.localized
 
             editBtn.setOnClickListener {
-                onClick.invoke(user)
+                onClick.invoke(user, position)
             }
         }
     }
@@ -38,6 +38,6 @@ class WhitelistedUsersAdapter(var users: MutableList<WhitelistedUser>, val onUse
 
     override fun onBindViewHolder(holder: WhitelistedUsersHolder, position: Int) {
         val item = users[position]
-        holder.bind(item, onUserClick)
+        holder.bind(item, position, onUserClick)
     }
 }

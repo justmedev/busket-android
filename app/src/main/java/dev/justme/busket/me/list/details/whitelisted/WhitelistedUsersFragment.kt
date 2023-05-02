@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import dev.justme.busket.BusketApplication
+import dev.justme.busket.MainActivity
 import dev.justme.busket.R
 import dev.justme.busket.databinding.DialogWhitelistedUserSettingsBinding
 import dev.justme.busket.databinding.FragmentWhitelistedUsersBinding
@@ -21,6 +22,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 private const val ARG_LIST_ID = "listId"
+private const val ARG_LIST_NAME = "listName"
 
 data class WhitelistedUser(
     val id: Int,
@@ -62,6 +64,7 @@ enum class WhitelistedUserStatus(val localized: String) {
 class WhitelistedUsersFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var listId: String? = null
+    private var listName: String? = null
     private lateinit var binding: FragmentWhitelistedUsersBinding
     private lateinit var feathers: FeathersSocket
     private val mainThread = Handler(Looper.getMainLooper())
@@ -70,6 +73,7 @@ class WhitelistedUsersFragment : Fragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             listId = it.getString(ARG_LIST_ID)
+            listName = it.getString(ARG_LIST_NAME)
         }
     }
 
@@ -82,6 +86,8 @@ class WhitelistedUsersFragment : Fragment() {
 
         binding.recyclerView.adapter = WhitelistedUsersAdapter(mutableListOf(), ::onUserClick)
         populate()
+
+        (activity as MainActivity).supportActionBar?.title = "Whitelist: $listName"
 
         return binding.root
     }
@@ -194,14 +200,16 @@ class WhitelistedUsersFragment : Fragment() {
          * this fragment using the provided parameters.
          *
          * @param listId Parameter 1.
+         * @param listName Parameter 1.
          * @return A new instance of fragment WhitelistedUsersFragment.
          */
         // TODO: Rename and change types and number of parameters
         @JvmStatic
-        fun newInstance(listId: String) =
+        fun newInstance(listId: String, listName: String) =
             WhitelistedUsersFragment().apply {
                 arguments = Bundle().apply {
                     putString(ARG_LIST_ID, listId)
+                    putString(ARG_LIST_NAME, listName)
                 }
             }
     }

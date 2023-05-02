@@ -1,7 +1,6 @@
 package dev.justme.busket.me.list.details
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -11,11 +10,8 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.os.bundleOf
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -306,7 +302,10 @@ class DetailedListView : Fragment() {
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
                 if (menuItem.itemId == R.id.action_manage_whitelisted) {
                     if (list == null) return false
-                    findNavController().navigate(R.id.action_DetailedListView_to_WhitelistedUsersFragment, bundleOf("listId" to list?.listId))
+                    findNavController().navigate(
+                        R.id.action_DetailedListView_to_WhitelistedUsersFragment,
+                        bundleOf("listId" to list?.listId, "listName" to list?.name)
+                    )
                     return true
                 }
                 return false

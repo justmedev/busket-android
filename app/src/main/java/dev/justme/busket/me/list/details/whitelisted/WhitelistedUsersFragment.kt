@@ -91,6 +91,8 @@ class WhitelistedUsersFragment : Fragment() {
         binding.recyclerView.adapter = WhitelistedUsersAdapter(mutableListOf(), ::onUserClick)
         populate()
 
+        (activity as MainActivity).supportActionBar?.title = "Whitelist: $listName"
+
         binding.inviteUserFab.setOnClickListener {
             val dialogView = DialogWithTextfieldBinding.inflate(inflater)
             dialogView.textInput.editText?.hint = getString(R.string.email)
@@ -135,7 +137,18 @@ class WhitelistedUsersFragment : Fragment() {
             dialog.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE)
         }
 
-        (activity as MainActivity).supportActionBar?.title = "Whitelist: $listName"
+        feathers.service(FeathersService.Service.WHITELISTED_USERS).on(FeathersService.SocketEventListener.PATCHED) { data, err ->
+            if (err != null || data == null) return@on
+
+            val whitelistedUser = WhitelistedUser.fromJSON(data)
+
+            mainThread.post {
+                val index = (binding.recyclerView.adapter as WhitelistedUsersAdapter).users.indexOfFirst { it.id == whitelistedUser.id }
+
+                (binding.recyclerView.adapter as WhitelistedUsersAdapter).users[index] = whitelistedUser
+                (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(index)
+            }
+        }
 
         return binding.root
     }

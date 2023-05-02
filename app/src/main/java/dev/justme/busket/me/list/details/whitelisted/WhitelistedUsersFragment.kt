@@ -111,9 +111,21 @@ class WhitelistedUsersFragment : Fragment() {
 
         val tmpPermissions = WhitelistedUserPermissions(user.canEditEntries, user.canDeleteEntries)
 
-        MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.permission_setting_title, user.email)).setView(dialogView.root)
+        fun setDialogLoading(loading: Boolean) {
+            val contentVisibility = if (loading) View.GONE else View.VISIBLE
+            val loaderVisibility = if (loading) View.VISIBLE else View.GONE
+
+            dialogView.kickUserBtn.visibility = contentVisibility
+            dialogView.canEditEntriesContainer.visibility = contentVisibility
+            dialogView.canDeleteEntriesContainer.visibility = contentVisibility
+
+            dialogView.loadingPermissions.root.visibility = loaderVisibility
+        }
+
+
+        val permissionDialog = MaterialAlertDialogBuilder(requireContext()).setTitle(getString(R.string.permission_setting_title, user.email)).setView(dialogView.root)
             .setPositiveButton(R.string.save) { d, _ ->
-                dialogView.loadingPermissions.root.visibility = View.VISIBLE
+                setDialogLoading(true)
 
                 val patchData = JSONObject()
                 patchData.put("canEditEntries", tmpPermissions.canEditEntries)
@@ -128,7 +140,7 @@ class WhitelistedUsersFragment : Fragment() {
                     mainThread.post {
                         (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(position)
 
-                        dialogView.loadingPermissions.root.visibility = View.GONE
+                        setDialogLoading(false)
                         d.dismiss()
                     }
                 }
@@ -148,6 +160,28 @@ class WhitelistedUsersFragment : Fragment() {
         dialogView.canDeleteEntriesContainer.setOnClickListener {
             tmpPermissions.canDeleteEntries = !tmpPermissions.canDeleteEntries
             dialogView.canDeleteEntriesCheckbox.isChecked = tmpPermissions.canDeleteEntries
+        }
+
+        dialogView.kickUserBtn.setOnClickListener {
+            setDialogLoading(true)
+            MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.are_you_sure).setMessage(R.string.permission_setting_kick_user_body)
+                .setPositiveButton(R.string.yes) { d, _ ->
+                    feathers.service(FeathersService.Service.WHITELISTED_USERS).remove(user.id) { data, err ->
+                        if (data == null || err != null) return@remove
+                        mainThread.post {
+                            (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemRemoved(position)
+
+                            setDialogLoading(false)
+                            d.dismiss()
+                            permissionDialog.dismiss()
+                        }
+                    }
+                }
+                .setNegativeButton(R.string.cancel) { d, _ ->
+                    setDialogLoading(false)
+                    d.dismiss()
+                }
+                .show()
         }
     }
 

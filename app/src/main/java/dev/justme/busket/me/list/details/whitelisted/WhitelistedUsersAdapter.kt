@@ -16,10 +16,15 @@ class WhitelistedUsersAdapter(var users: MutableList<WhitelistedUser>, val onUse
         val email = binding.whitelistedUsersEmail
         val status = binding.whitelistedUsersStatus
         val editBtn = binding.whitelistedUsersEditButton
+        val card = binding.whitelistedUsersCard
 
         fun bind(user: WhitelistedUser, position: Int, onClick: UserClickListener) {
             email.text = user.email
             status.text = user.status.localized
+
+            card.setOnClickListener {
+                onClick.invoke(user, position)
+            }
 
             editBtn.setOnClickListener {
                 onClick.invoke(user, position)

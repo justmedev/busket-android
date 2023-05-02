@@ -48,10 +48,15 @@
     <string name="whitelist_pending_invitation">Pending invite…</string>
     <string name="whitelist_joined">Joined</string>
     <string name="save">Save</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="are_you_sure">Are you sure?</string>
 
     <string name="permission_setting_title">Edit %1$s\'s permissions</string>
     <string name="permission_setting_can_edit_entries">Can edit entries</string>
     <string name="permission_setting_can_edit_entries_body">When true, this user can move, check and create entries</string>
     <string name="permission_setting_can_delete_entries">Can delete entries</string>
     <string name="permission_setting_can_delete_entries_body">When true, this user can delete entries</string>
+    <string name="permission_setting_kick_user">Kick User</string>
+    <string name="permission_setting_kick_user_body">This user will no longer be able to access your list until you invite them again!</string>
 </resources>

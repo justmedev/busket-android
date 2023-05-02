@@ -84,6 +84,13 @@
                 android:layout_height="wrap_content"
                 android:text="@string/permission_setting_can_delete_entries_body" />
         </LinearLayout>
-
     </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <Button
+        android:id="@+id/kickUserBtn"
+        android:layout_marginTop="@dimen/vertical_space_small"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/permission_setting_kick_user"/>
 </LinearLayout>

@@ -73,8 +73,7 @@ class LoginFragment : Fragment() {
             if (validateInput(binding.loginEmailInput.text, binding.loginPasswordInput.text)) {
                 if (context == null) return@setOnClickListener
 
-                binding.loginContainer.visibility = View.GONE
-                binding.loginLoaderContainer.visibility = View.VISIBLE
+                setLoadingState(true)
 
                 FeathersSocket.getInstance(requireContext()).authenticate(
                     binding.loginEmailInput.text.toString(),
@@ -92,18 +91,23 @@ class LoginFragment : Fragment() {
                             binding.loginLoginButton.isEnabled = true
                         }
 
-                        if (it.code == 401) {
-                            Snackbar.make(view, "Wrong email or password!", Snackbar.LENGTH_LONG)
-                                .show()
-                            return@authenticate
+                        when (it.code) {
+                            401 -> Snackbar.make(view, "Wrong email or password!", Snackbar.LENGTH_LONG).show()
+                            400 -> Snackbar.make(view, "Invalid email format!", Snackbar.LENGTH_LONG).show()
+                            else -> Snackbar.make(view, "An error occurred!", Snackbar.LENGTH_LONG).show()
                         }
 
-                        Snackbar.make(view, "An error occurred!", Snackbar.LENGTH_LONG).show()
+                        handler.post { setLoadingState(false) }
                         Log.e("Busket", it.toString())
                     }
                 )
             }
         }
+    }
+
+    private fun setLoadingState(loading: Boolean) {
+        binding.loginContainer.visibility = if (loading) View.GONE else View.VISIBLE
+        binding.loginLoaderContainer.visibility = if (loading) View.VISIBLE else View.GONE
     }
 
     private fun validateInput(email: Editable?, password: Editable?): Boolean {

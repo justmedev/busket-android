@@ -88,13 +88,24 @@ class DetailedListView : Fragment() {
 
             val whitelistedUsers = WhitelistedUser.fromJSONArray(data.getJSONArray(ARRAY_DATA_KEY))
             if (whitelistedUsers.isEmpty()) {
-                handler.post(cb)
+                handler.post {
+                    setLoadingState(false)
+                    cb.invoke()
+                }
                 return@find
             }
 
             whitelistedUser = whitelistedUsers.find { it.user == feathers.user?.uuid }
-            handler.post(cb)
+            handler.post {
+                setLoadingState(false)
+                cb.invoke()
+            }
         }
+    }
+
+    private fun setLoadingState(loading: Boolean) {
+        binding.listContainer.visibility = if (loading) View.GONE else View.VISIBLE
+        binding.listLoader.visibility = if (loading) View.VISIBLE else View.GONE
     }
 
     override fun onCreateView(
@@ -106,8 +117,7 @@ class DetailedListView : Fragment() {
 
         feathers = FeathersSocket.getInstance(requireContext())
 
-        binding.listContainer.visibility = View.GONE
-        binding.listLoader.visibility = View.VISIBLE
+        setLoadingState(true)
 
         binding.addItemBtn.setOnClickListener { createEntry() }
         binding.detailedListTextInputLayout.editText!!.setOnEditorActionListener { _, actionId, _ ->
@@ -174,8 +184,6 @@ class DetailedListView : Fragment() {
             }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name
-            binding.listContainer.visibility = View.VISIBLE
-            binding.listLoader.visibility = View.GONE
         }
 
         feathers.service(FeathersService.Service.WHITELISTED_USERS).on(FeathersService.SocketEventListener.PATCHED) { data, err ->

@@ -1,6 +1,7 @@
 package dev.justme.busket.me.list.details
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -17,24 +18,21 @@ typealias ItemMovedListener = (entry: ListDetailsRecyclerEntry, fromPosition: In
 data class ListDetailsRecyclerEntry(var checked: Boolean, var name: String, val id: String)
 
 
-class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMove: ItemMovedListener, val onItemCheck: ListClickListener, val onItemLongPress: ListClickListener, val showItemHandle: Boolean, var permissions: WhitelistedUserPermissions, val viewHolderBoundCallback: (holder: ListDetailsHolder) -> Unit, val startDragListener: StartDragListener?) :
+class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val onItemMove: ItemMovedListener, val onItemCheck: ListClickListener, val onItemLongPress: ListClickListener, val showItemHandle: Boolean, var permissions: WhitelistedUserPermissions, val startDragListener: StartDragListener?) :
     RecyclerView.Adapter<ListDetailsAdapter.ListDetailsHolder>(), ItemMoveCallback.ItemTouchHelperContract {
 
-    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemCheck: ListClickListener, onItemLongPress: ListClickListener, showItemHandle: Boolean, permissions: WhitelistedUserPermissions, viewHolderBoundCallback: (holder: ListDetailsHolder) -> Unit)
-            : this(entries, onItemMoved, onItemCheck, onItemLongPress, showItemHandle, permissions, viewHolderBoundCallback, null)
+    constructor(entries: MutableList<ListDetailsRecyclerEntry>, onItemMoved: ItemMovedListener, onItemCheck: ListClickListener, onItemLongPress: ListClickListener, showItemHandle: Boolean, permissions: WhitelistedUserPermissions)
+            : this(entries, onItemMoved, onItemCheck, onItemLongPress, showItemHandle, permissions, null)
 
     lateinit var binding: ListDetailsItemBinding
-
-    var viewHolder: ListDetailsHolder? = null
 
     class ListDetailsHolder(binding: ListDetailsItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val checkBox = binding.listDetailsItemCheck
         val handle = binding.listDetailsItemHandle
         val card = binding.listDetailsCard
 
-
         @SuppressLint("ClickableViewAccessibility")
-        fun bind(entry: ListDetailsRecyclerEntry, onCheckClick: ListClickListener, onLongClick: ListClickListener, showHandle: Boolean, permissions: WhitelistedUserPermissions, startDragListener: StartDragListener?, holder: ListDetailsHolder) {
+        fun bind(entry: ListDetailsRecyclerEntry, onCheckClick: ListClickListener, onLongClick: ListClickListener, showHandle: Boolean, permissions: WhitelistedUserPermissions, startDragListener: StartDragListener?) {
             fun longPressListener(v: View): Boolean {
                 onLongClick.invoke(entry)
                 return true
@@ -43,7 +41,7 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
             if (!showHandle) handle.visibility = View.GONE;
             else {
                 handle.setOnTouchListener { _, e ->
-                    if (e.action == MotionEvent.ACTION_DOWN) startDragListener?.requestDrag(holder)
+                    if (e.action == MotionEvent.ACTION_DOWN) startDragListener?.requestDrag(this)
                     false
                 }
             }
@@ -57,12 +55,9 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
                 entry.checked = !entry.checked
                 onCheckClick.invoke(entry)
             }
-            permissionsUpdated(permissions)
-        }
 
-        fun permissionsUpdated(permissions: WhitelistedUserPermissions) {
             checkBox.isEnabled = permissions.canEditEntries
-            handle.visibility = if (permissions.canEditEntries) View.VISIBLE else View.INVISIBLE
+            handle.visibility = if (showHandle && permissions.canEditEntries) View.VISIBLE else View.INVISIBLE
         }
     }
 
@@ -77,10 +72,8 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
 
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
-        holder.bind(item, onItemCheck, onItemLongPress, showItemHandle, permissions, startDragListener, holder)
-
-        viewHolder = holder
-        viewHolderBoundCallback.invoke(holder)
+        Log.d(javaClass.simpleName, "onBindViewHolder: canEditEntries ${permissions.canEditEntries}; canDeleteEntries ${permissions.canDeleteEntries}")
+        holder.bind(item, onItemCheck, onItemLongPress, showItemHandle, permissions, startDragListener)
     }
 
     override fun onRowMoved(fromPosition: Int, toPosition: Int) {

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -51,7 +52,7 @@ class DetailedListView : Fragment() {
     private lateinit var syncListDetailsManager: SyncListDetailsManager
     private lateinit var itemTouchHelper: ItemTouchHelper
 
-    private var whitelistedUser: WhitelistedUser? = WhitelistedUser.fromJSON(JSONObject())
+    private var whitelistedUser: WhitelistedUser? = null
     private val permissions: WhitelistedUserPermissions
         get() = WhitelistedUserPermissions(whitelistedUser?.canEditEntries ?: true, whitelistedUser?.canDeleteEntries ?: true)
 
@@ -84,8 +85,14 @@ class DetailedListView : Fragment() {
 
         feathers.service(FeathersService.Service.WHITELISTED_USERS).find(query) { data, err ->
             if (data == null || err != null) return@find
-            whitelistedUser = WhitelistedUser.fromJSONArray(data.getJSONArray(ARRAY_DATA_KEY))[0]
 
+            val whitelistedUsers = WhitelistedUser.fromJSONArray(data.getJSONArray(ARRAY_DATA_KEY))
+            if (whitelistedUsers.isEmpty()) {
+                handler.post(cb)
+                return@find
+            }
+
+            whitelistedUser = whitelistedUsers.find { it.user == feathers.user?.uuid }
             handler.post(cb)
         }
     }
@@ -113,7 +120,7 @@ class DetailedListView : Fragment() {
         binding.clearBtn.setOnClickListener {
             clearDone()
         }
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, permissions, ::viewHolderBound, object : StartDragListener {
+        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, permissions, object : StartDragListener {
             override fun requestDrag(viewHolder: RecyclerView.ViewHolder) {
                 itemTouchHelper.startDrag(viewHolder)
             }
@@ -122,9 +129,10 @@ class DetailedListView : Fragment() {
         itemTouchHelper.attachToRecyclerView(binding.todoList)
         binding.todoList.adapter = adapter
 
-        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false, permissions, ::viewHolderBound)
+        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false, permissions)
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
+            loadWhitelistedUserFromRemote(::updatePermissions)
 
             syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
             syncListDetailsManager.registerEventListener(
@@ -174,10 +182,7 @@ class DetailedListView : Fragment() {
             if (err != null || data == null) return@on
 
             whitelistedUser = WhitelistedUser.fromJSON(data)
-            handler.post {
-                (binding.todoList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
-                (binding.doneList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
-            }
+            handler.post(::updatePermissions)
         }
 
         feathers.service(FeathersService.Service.WHITELISTED_USERS).on(FeathersService.SocketEventListener.REMOVED) { data, err ->
@@ -190,11 +195,18 @@ class DetailedListView : Fragment() {
         return binding.root;
     }
 
-    private fun viewHolderBound(holder: ListDetailsAdapter.ListDetailsHolder) {
-        loadWhitelistedUserFromRemote {
-            (binding.todoList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
-            (binding.doneList.adapter as ListDetailsAdapter).viewHolder?.permissionsUpdated(permissions)
-        }
+    private fun updatePermissions() {
+        Log.d(javaClass.simpleName, "updatePermissions: canEditEntries ${permissions.canEditEntries}; canDeleteEntries ${permissions.canDeleteEntries}")
+        (binding.todoList.adapter as ListDetailsAdapter).permissions = permissions
+        (binding.doneList.adapter as ListDetailsAdapter).permissions = permissions
+        (binding.todoList.adapter as ListDetailsAdapter).notifyItemRangeChanged(0, (binding.todoList.adapter as ListDetailsAdapter).entries.size)
+        (binding.doneList.adapter as ListDetailsAdapter).notifyItemRangeChanged(0, (binding.doneList.adapter as ListDetailsAdapter).entries.size)
+
+        val editVisibility = if (permissions.canEditEntries) View.VISIBLE else View.GONE
+
+        binding.clearBtn.visibility = if (permissions.canDeleteEntries) View.VISIBLE else View.GONE
+        binding.addItemBtn.visibility = editVisibility
+        binding.detailedListTextInputLayout.visibility = editVisibility
     }
 
     // region handle list events

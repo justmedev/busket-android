@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import dev.justme.busket.feathers.responses.ShoppingList
+import dev.justme.busket.helpers.SessionStore
 import org.json.JSONArray
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
@@ -67,7 +68,7 @@ data class ShoppingListEventListeners(
 
 class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
     private val feathers = FeathersSocket.getInstance(context)
-    private val sessionUUID = UUID.randomUUID().toString()
+    private val sessionUUID = SessionStore.sessionUUID
     private val eventQueue: MutableList<ShoppingListEvent> = mutableListOf()
     private var eventListenerAttached = false
     private var eventListeners: ShoppingListEventListeners? = null
@@ -85,7 +86,6 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
             if (err != null) return@on // TODO: Handle error
             val event: ShoppingListEvent = feathers.gson.fromJson(data.toString(), ShoppingListEvent::class.java)
 
-            Log.d("SyncListDetailsManager Event", "${event.eventData.event} executed by ${event.eventData.sender} at ${event.eventData.isoDate} on entry ${event.eventData.entryId}")
             if (event.listid != list.listId) {
                 Log.d("SyncListDetailsManager Event", "${event.eventData.event} is being ignored because it wasn't for the currently open list!")
                 return@on// Event was for other list (not the one we are on)}
@@ -95,6 +95,7 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
                 Log.d("SyncListDetailsManager Event", "${event.eventData.event} executed by us on entry ${event.eventData.entryId} is ignored by syncManager because its already handled")
                 return@on
             }
+            Log.d("SyncListDetailsManager Event", "${event.eventData.event} executed by ${event.eventData.sender} at ${event.eventData.isoDate} on entry ${event.eventData.entryId} ${event.eventData.state.name}")
 
             handler.post {
                 when (event.eventData.event) {

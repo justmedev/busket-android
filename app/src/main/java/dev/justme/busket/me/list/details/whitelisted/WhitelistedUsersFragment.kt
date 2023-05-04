@@ -74,9 +74,12 @@ class WhitelistedUsersFragment : Fragment() {
     // TODO: Rename and change types of parameters
     private var listId: String? = null
     private var listName: String? = null
+    private val adapter = WhitelistedUsersAdapter(mutableListOf(), ::onUserClick)
+
     private lateinit var binding: FragmentWhitelistedUsersBinding
     private lateinit var feathers: FeathersSocket
     private val mainThread = Handler(Looper.getMainLooper())
+    
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -93,7 +96,7 @@ class WhitelistedUsersFragment : Fragment() {
         binding = FragmentWhitelistedUsersBinding.inflate(inflater, container, false)
         feathers = FeathersSocket.getInstance(requireContext())
 
-        binding.recyclerView.adapter = WhitelistedUsersAdapter(mutableListOf(), ::onUserClick)
+        binding.recyclerView.adapter = adapter
         populate()
 
         (activity as MainActivity).supportActionBar?.title = "Whitelist: $listName"
@@ -129,8 +132,8 @@ class WhitelistedUsersFragment : Fragment() {
                 feathers.service(FeathersService.Service.WHITELISTED_USERS).create(data) { res, err ->
                     if (res == null || err != null) return@create
                     mainThread.post {
-                        (binding.recyclerView.adapter as WhitelistedUsersAdapter).users.add(WhitelistedUser.fromJSON(res))
-                        (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemInserted((binding.recyclerView.adapter as WhitelistedUsersAdapter).users.size - 1)
+                        adapter.users.add(WhitelistedUser.fromJSON(res))
+                        adapter.notifyItemInserted(adapter.users.size - 1)
 
                         loadingDialog.dismiss()
                         dialog.dismiss()
@@ -148,10 +151,10 @@ class WhitelistedUsersFragment : Fragment() {
             val whitelistedUser = WhitelistedUser.fromJSON(data)
 
             mainThread.post {
-                val index = (binding.recyclerView.adapter as WhitelistedUsersAdapter).users.indexOfFirst { it.id == whitelistedUser.id }
+                val index = adapter.users.indexOfFirst { it.id == whitelistedUser.id }
 
-                (binding.recyclerView.adapter as WhitelistedUsersAdapter).users[index] = whitelistedUser
-                (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(index)
+                adapter.users[index] = whitelistedUser
+                adapter.notifyItemChanged(index)
             }
         }
 
@@ -166,8 +169,8 @@ class WhitelistedUsersFragment : Fragment() {
             if (error != null || data == null) return@find
 
             mainThread.post {
-                (binding.recyclerView.adapter as WhitelistedUsersAdapter).users = mutableListOf(*WhitelistedUser.fromJSONArray(data.getJSONArray(ARRAY_DATA_KEY)))
-                (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyDataSetChanged()
+                adapter.users = mutableListOf(*WhitelistedUser.fromJSONArray(data.getJSONArray(ARRAY_DATA_KEY)))
+                adapter.notifyDataSetChanged()
             }
         }
     }
@@ -205,7 +208,7 @@ class WhitelistedUsersFragment : Fragment() {
                     user.canDeleteEntries = tmpPermissions.canDeleteEntries
 
                     mainThread.post {
-                        (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemChanged(position)
+                        adapter.notifyItemChanged(position)
 
                         setDialogLoading(false)
                         d.dismiss()
@@ -236,8 +239,8 @@ class WhitelistedUsersFragment : Fragment() {
                     feathers.service(FeathersService.Service.WHITELISTED_USERS).remove(user.id) { data, err ->
                         if (data == null || err != null) return@remove
                         mainThread.post {
-                            (binding.recyclerView.adapter as WhitelistedUsersAdapter).users.removeAt(position)
-                            (binding.recyclerView.adapter as WhitelistedUsersAdapter).notifyItemRemoved(position)
+                            adapter.users.removeAt(position)
+                            adapter.notifyItemRemoved(position)
 
                             setDialogLoading(false)
                             d.dismiss()

@@ -14,19 +14,14 @@
         <action
             android:id="@+id/action_LoginFragment_to_RegisterFragment"
             app:destination="@id/RegisterFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out"
-            />
+            app:enterAnim="@anim/slide_left"
+            app:popExitAnim="@anim/slide_and_fade_out" />
 
         <action
             android:id="@+id/action_LoginFragment_to_HomeFragment"
             app:destination="@id/HomeFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out"
+            app:enterAnim="@anim/slide_left"
+            app:popEnterAnim="@anim/slide_left"
             app:popUpTo="@id/LoginFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -34,26 +29,7 @@
         android:id="@+id/RegisterFragment"
         android:name="dev.justme.busket.auth.RegisterFragment"
         android:label="@string/register_fragment_label"
-        tools:layout="@layout/fragment_register">
-
-        <action
-            android:id="@+id/action_RegisterFragment_to_LoginFragment"
-            app:destination="@id/LoginFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out"
-            />
-
-        <action
-            android:id="@+id/action_RegisterFragment_to_HomeFragment"
-            app:destination="@id/LoginFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out"
-            />
-    </fragment>
+        tools:layout="@layout/fragment_register"/>
 
     <fragment
         android:id="@+id/HomeFragment"
@@ -64,10 +40,8 @@
         <action
             android:id="@+id/action_HomeFragment_to_LoginFragment"
             app:destination="@id/LoginFragment"
-            app:enterAnim="@android:anim/fade_in"
-            app:exitAnim="@android:anim/fade_out"
-            app:popEnterAnim="@android:anim/fade_in"
-            app:popExitAnim="@android:anim/fade_out"
+            app:enterAnim="@anim/slide_left"
+            app:popEnterAnim="@anim/slide_left"
             app:popUpTo="@id/HomeFragment"
             app:popUpToInclusive="true" />
         <action

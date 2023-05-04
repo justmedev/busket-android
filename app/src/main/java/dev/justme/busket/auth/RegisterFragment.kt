@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
-import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentRegisterBinding
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
@@ -68,7 +67,7 @@ class RegisterFragment : Fragment() {
         }
 
         binding.registerLoginButton.setOnClickListener {
-            findNavController().navigate(R.id.action_RegisterFragment_to_LoginFragment)
+            findNavController().popBackStack()
         }
     }
 

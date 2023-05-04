@@ -150,33 +150,32 @@ class DetailedListView : Fragment() {
             loadWhitelistedUserFromRemote(::updatePermissions)
 
             syncListDetailsManager = SyncListDetailsManager(requireContext(), list!!)
-            syncListDetailsManager.registerEventListener(
-                ShoppingListEventListeners(
-                    {
-                        createEntry(it.eventData.state.name, it.eventData.entryId, false)
-                    },
-                    {
-                        val entry = findEntryGlobalById(it.eventData.entryId)
-                        if (entry.list == ListType.TODO) {
-                            (binding.todoList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
-                        } else {
-                            (binding.doneList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
-                        }
-                    },
-                    {
-                        deleteEntry(it.eventData.entryId)
-                    },
-                    {
-                        renameEntry(it.eventData.entryId, it.eventData.state.name, false)
-                    },
-                    {
-                        onItemCheckStateChange(ListDetailsRecyclerEntry(false, it.eventData.state.name, it.eventData.entryId), false)
-                    },
-                    {
-                        onItemCheckStateChange(ListDetailsRecyclerEntry(true, it.eventData.state.name, it.eventData.entryId), false)
-                    },
-                )
-            )
+            syncListDetailsManager.registerEventListener(ShoppingListEventListeners(
+                {
+                    createEntry(it.eventData.state.name, it.eventData.entryId, false)
+                },
+                {
+                    val entry = findEntryGlobalById(it.eventData.entryId)
+                    if (entry.list == ListType.TODO) {
+                        (binding.todoList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
+                    } else {
+                        (binding.doneList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
+                    }
+                },
+                {
+                    deleteEntry(it.eventData.entryId)
+                },
+                {
+                    renameEntry(it.eventData.entryId, it.eventData.state.name, false)
+                },
+                {
+                    onItemCheckStateChange(ListDetailsRecyclerEntry(false, it.eventData.state.name, it.eventData.entryId), false)
+                },
+                {
+                    onItemCheckStateChange(ListDetailsRecyclerEntry(true, it.eventData.state.name, it.eventData.entryId), false)
+                },
+            ))
+
 
             val entries = list!!.entries.toMutableList()
             for (entry in entries) {
@@ -207,6 +206,11 @@ class DetailedListView : Fragment() {
         }
 
         return binding.root;
+    }
+
+    override fun onPause() {
+        super.onPause()
+        syncListDetailsManager.destroy()
     }
 
     private fun updatePermissions() {

@@ -64,12 +64,16 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
         emit(Method.GET, arrayOf(null, query), cb)
     }
 
+    fun getEventPath(event: SocketEventListener): String {
+        return "${path.lowercase()} ${event.method}"
+    }
+
     fun on(
         event: SocketEventListener,
         callback: (data: JSONObject?, error: SocketError?) -> Unit
     ) {
         feathers.requireConnected {
-            feathers.socket.on("${path.lowercase()} ${event.method}") {
+            feathers.socket.on(getEventPath(event)) {
                 for (res in it) {
                     if (res != null) {
                         var out = JSONObject()
@@ -91,6 +95,12 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
                     }
                 }
             }
+        }
+    }
+
+    fun off(event: SocketEventListener) {
+        feathers.requireConnected {
+            feathers.socket.off(getEventPath(event))
         }
     }
 

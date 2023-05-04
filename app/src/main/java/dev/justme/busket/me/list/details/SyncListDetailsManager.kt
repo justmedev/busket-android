@@ -110,6 +110,12 @@ class SyncListDetailsManager(val context: Context, val list: ShoppingList) {
         }
     }
 
+    fun destroy() {
+        eventListeners = null
+        eventListenerAttached = false
+        feathers.service(FeathersService.Service.EVENT).off(FeathersService.SocketEventListener.CREATED)
+    }
+
     fun recordEvent(event: ShoppingListEventType, entryId: String, eventState: ShoppingListEventState) {
         recordEvent(event, entryId, eventState, true)
     }

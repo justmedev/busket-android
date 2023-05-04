@@ -72,7 +72,6 @@ class ListDetailsAdapter(var entries: MutableList<ListDetailsRecyclerEntry>, val
 
     override fun onBindViewHolder(holder: ListDetailsHolder, position: Int) {
         val item = entries[position]
-        Log.d(javaClass.simpleName, "onBindViewHolder: canEditEntries ${permissions.canEditEntries}; canDeleteEntries ${permissions.canDeleteEntries}")
         holder.bind(item, onItemCheck, onItemLongPress, showItemHandle, permissions, startDragListener)
     }
 

@@ -40,11 +40,16 @@ import java.util.UUID
 
 private const val ARG_LIST_ID = "listId"
 
+abstract class ListDetailsMenuProvider : MenuProvider {
+    open lateinit var menu: Menu
+}
+
 class DetailedListView : Fragment() {
     private var _binding: FragmentDetailedListViewBinding? = null
     private val binding get() = _binding!!
 
     private val handler = Handler(Looper.getMainLooper())
+    private lateinit var menuProvider: ListDetailsMenuProvider
 
     private var listId: String? = null
     private var list: ShoppingList? = null
@@ -184,6 +189,7 @@ class DetailedListView : Fragment() {
             }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name
+            menuProvider.menu.findItem(R.id.action_manage_whitelisted).isVisible = list?.owner == feathers.user?.uuid
         }
 
         feathers.service(FeathersService.Service.WHITELISTED_USERS).on(FeathersService.SocketEventListener.PATCHED) { data, err ->
@@ -357,9 +363,14 @@ class DetailedListView : Fragment() {
     // endregion
 
     private fun setupMenu() {
-        (requireActivity() as MenuHost).addMenuProvider(object : MenuProvider {
+        menuProvider = object : ListDetailsMenuProvider() {
+            override lateinit var menu: Menu
+
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.detailed_list_menu, menu)
+                this.menu = menu
+
+                menu.findItem(R.id.action_manage_whitelisted).isVisible = false
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
@@ -373,7 +384,9 @@ class DetailedListView : Fragment() {
                 }
                 return false
             }
-        }, viewLifecycleOwner, Lifecycle.State.RESUMED)
+        }
+
+        (requireActivity() as MenuHost).addMenuProvider(menuProvider, viewLifecycleOwner, Lifecycle.State.RESUMED)
     }
 
     companion object {

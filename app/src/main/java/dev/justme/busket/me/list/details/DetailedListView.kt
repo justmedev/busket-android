@@ -203,7 +203,7 @@ class DetailedListView : Fragment() {
             if (err != null || data == null) return@on
 
             list = null
-            findNavController().navigate(R.id.action_DetailedListView_to_HomeFragment)
+            findNavController().popBackStack(R.id.HomeFragment, false)
         }
 
         return binding.root;
@@ -369,8 +369,6 @@ class DetailedListView : Fragment() {
             override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
                 menuInflater.inflate(R.menu.detailed_list_menu, menu)
                 this.menu = menu
-
-                menu.findItem(R.id.action_manage_whitelisted).isVisible = false
             }
 
             override fun onMenuItemSelected(menuItem: MenuItem): Boolean {

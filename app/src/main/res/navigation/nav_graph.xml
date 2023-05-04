@@ -40,16 +40,20 @@
         <action
             android:id="@+id/action_HomeFragment_to_LoginFragment"
             app:destination="@id/LoginFragment"
-            app:enterAnim="@anim/slide_left"
+            app:enterAnim="@anim/slide_up"
             app:popEnterAnim="@anim/slide_left"
             app:popUpTo="@id/HomeFragment"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_HomeFragment_to_DetailedListView"
-            app:destination="@id/DetailedListView" />
+            app:destination="@id/DetailedListView"
+            app:enterAnim="@anim/slide_left"
+            app:popExitAnim="@anim/slide_and_fade_out" />
         <action
             android:id="@+id/action_HomeFragment_to_Settings"
-            app:destination="@id/Settings" />
+            app:destination="@id/Settings"
+            app:enterAnim="@anim/slide_left"
+            app:popExitAnim="@anim/slide_and_fade_out" />
     </fragment>
 
     <fragment
@@ -58,22 +62,17 @@
         android:label="@string/loading"
         tools:layout="@layout/fragment_detailed_list_view">
         <action
-            android:id="@+id/action_DetailedListView_to_HomeFragment"
-            app:destination="@id/HomeFragment" />
-        <action
             android:id="@+id/action_DetailedListView_to_WhitelistedUsersFragment"
-            app:destination="@id/WhitelistedUsersFragment" />
+            app:destination="@id/WhitelistedUsersFragment"
+            app:enterAnim="@anim/slide_left"
+            app:popExitAnim="@anim/slide_and_fade_out" />
     </fragment>
 
     <fragment
         android:id="@+id/WhitelistedUsersFragment"
         android:name="dev.justme.busket.me.list.details.whitelisted.WhitelistedUsersFragment"
         android:label="@string/loading"
-        tools:layout="@layout/fragment_whitelisted_users">
-        <action
-            android:id="@+id/action_WhitelistedUsersFragment_to_DetailedListView"
-            app:destination="@id/DetailedListView" />
-    </fragment>
+        tools:layout="@layout/fragment_whitelisted_users"/>
 
     <fragment
         android:id="@+id/Settings"
@@ -82,6 +81,7 @@
         tools:layout="@layout/fragment_settings">
         <action
             android:id="@+id/action_Settings_to_LoginFragment"
-            app:destination="@id/LoginFragment" />
+            app:destination="@id/LoginFragment"
+            app:enterAnim="@anim/slide_up" />
     </fragment>
 </navigation>

@@ -1,9 +1,13 @@
 package dev.justme.busket.me.settings
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -19,6 +23,7 @@ class SettingsFragment : Fragment() {
     private var listId: String? = null
     private var _binding: FragmentSettingsBinding? = null
     private val binding get() = _binding!!
+    private val mainThread = Handler(Looper.getMainLooper())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,16 +45,33 @@ class SettingsFragment : Fragment() {
         }
 
         binding.deleteAccountBtn.setOnClickListener {
-            feathers.service(FeathersService.Service.USERS).remove(JSONObject()) { _, err ->
-                if (err != null) {
-                    MaterialAlertDialogBuilder(requireContext()).setCancelable(false).setTitle(R.string.unexpected_error).setMessage(R.string.error_deleting_user).setPositiveButton(R.string.ok) { dialog, _ ->
-                        dialog.dismiss()
+            areYouSure(R.string.delete_account_notice) { d, _ ->
+                feathers.service(FeathersService.Service.USERS).remove(feathers.user?.id ?: -1) { _, err ->
+                    if (err != null) {
+                        mainThread.post {
+                            MaterialAlertDialogBuilder(requireContext()).setCancelable(false).setTitle(R.string.unexpected_error).setMessage(R.string.error_deleting_user).setPositiveButton(R.string.ok) { dialog, _ ->
+                                dialog.dismiss()
+                            }.show()
+                        }
+                        return@remove
+                    }
+
+                    mainThread.post {
+                        d.dismiss()
+                        findNavController().navigate(R.id.action_Settings_to_LoginFragment)
                     }
                 }
             }
         }
 
         return binding.root
+    }
+
+    private fun areYouSure(message: Int, yesCallback: DialogInterface.OnClickListener) {
+        MaterialAlertDialogBuilder(requireContext()).setTitle(R.string.are_you_sure).setMessage(message)
+            .setPositiveButton(R.string.yes, yesCallback)
+            .setNegativeButton(R.string.cancel) { d, _ -> d.dismiss() }
+            .show()
     }
 
     companion object {

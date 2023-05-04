@@ -1,13 +1,17 @@
 package dev.justme.busket.auth
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast.LENGTH_LONG
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.snackbar.Snackbar
 import dev.justme.busket.R
 import dev.justme.busket.databinding.FragmentRegisterBinding
 import dev.justme.busket.feathers.FeathersService
@@ -25,6 +29,7 @@ class RegisterFragment : Fragment() {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+    private val mainThread = Handler(Looper.getMainLooper())
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -57,9 +62,16 @@ class RegisterFragment : Fragment() {
                 )
 
                 feathers.service(FeathersService.Service.USERS).create(JSONObject(obj)) { _, err ->
-                    if (err != null) return@create
+                    if (err != null) {
+                        mainThread.post {
+                            Snackbar.make(binding.root, R.string.user_already_exists, LENGTH_LONG).show()
+                        }
+                        return@create
+                    }
                     feathers.authenticate(obj["email"] ?: "", obj["password"] ?: "", {
-                        findNavController().navigate(R.id.action_RegisterFragment_to_HomeFragment)
+                        mainThread.post {
+                            findNavController().navigate(R.id.action_RegisterFragment_to_HomeFragment)
+                        }
                     })
                 }
             }

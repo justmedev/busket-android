@@ -29,7 +29,13 @@
         android:id="@+id/RegisterFragment"
         android:name="dev.justme.busket.auth.RegisterFragment"
         android:label="@string/register_fragment_label"
-        tools:layout="@layout/fragment_register"/>
+        tools:layout="@layout/fragment_register">
+        <action
+            android:id="@+id/action_RegisterFragment_to_HomeFragment"
+            app:destination="@id/HomeFragment"
+            app:enterAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_down" />
+    </fragment>
 
     <fragment
         android:id="@+id/HomeFragment"

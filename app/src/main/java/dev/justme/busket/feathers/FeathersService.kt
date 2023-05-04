@@ -1,5 +1,6 @@
 package dev.justme.busket.feathers
 
+import android.util.Log
 import io.socket.client.Ack
 import org.json.JSONArray
 import org.json.JSONObject
@@ -147,6 +148,8 @@ class FeathersService(private val feathers: FeathersSocket, val path: String) {
                         }
                         if (!feathers.isSuccessCode(statusCode)) {
                             val errorObj = feathers.gson.fromJson(res.toString(), SocketError::class.java)
+
+                            Log.e(javaClass.simpleName, "$path::${method} $errorObj")
                             callback?.invoke(null, errorObj)
                             return@Ack
                         }

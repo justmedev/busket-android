@@ -24,7 +24,14 @@ data class SocketError(
 
     val data: Any?,
     val errors: List<Any>?,
-)
+) {
+    override fun toString(): String {
+        val jObj = JSONObject()
+        jObj.put("data", data)
+        jObj.put("errors", errors)
+        return "SocketError $name($className) [$code]: $message\n${jObj.toString(4)}"
+    }
+}
 
 class FeathersSocket(private val context: Context) {
     //region privates

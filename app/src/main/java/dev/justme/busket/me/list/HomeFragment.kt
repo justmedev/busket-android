@@ -103,6 +103,7 @@ class HomeFragment : Fragment() {
                         if (error != null || data == null) return@create
                         shoppingLists.add(ShoppingList.fromJSONObject(data))
                         handler.post {
+                            binding.noListsText.visibility = View.GONE
                             (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists.toMutableList()
                             binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(shoppingLists.lastIndex)
                         }
@@ -168,19 +169,22 @@ class HomeFragment : Fragment() {
 
             Log.d("Busket HomeFragment", data.toString())
 
-            for (i in 0 until array.length()) {
-                val libraryEntry = array.getJSONObject(i)
+            handler.post {
+                binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(requireContext(), shoppingLists.toMutableList(), ::openList, ::removeListFromLibrary)
+                (binding.homeListOverviewRecyclerview.adapter as ListOverviewAdapter).lists = shoppingLists
 
-                val shoppingList = ShoppingList.fromJSONObject(libraryEntry.getJSONObject("list"))
-                shoppingLists.add(shoppingList)
+                for (i in 0 until array.length()) {
+                    val libraryEntry = array.getJSONObject(i)
 
-                handler.post {
-                    binding.homeListOverviewRecyclerview.adapter = ListOverviewAdapter(requireContext(), shoppingLists.toMutableList(), ::openList, ::removeListFromLibrary)
+                    val shoppingList = ShoppingList.fromJSONObject(libraryEntry.getJSONObject("list"))
+                    shoppingLists.add(shoppingList)
+
                     binding.homeListOverviewRecyclerview.adapter?.notifyItemInserted(i)
-
-                    binding.homeListOverviewRecyclerview.visibility = View.VISIBLE
-                    binding.homeListOverviewLoader.visibility = View.GONE
                 }
+
+                binding.homeListOverviewRecyclerview.visibility = View.VISIBLE
+                binding.homeListOverviewLoader.visibility = View.GONE
+                if (shoppingLists.isEmpty()) binding.noListsText.visibility = View.VISIBLE
             }
         }
     }

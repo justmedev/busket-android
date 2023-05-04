@@ -63,4 +63,5 @@
     <string name="invite">Invite</string>
     <string name="delete_account_notice">Do you really want to delete your Busket account? All associated info (lists, shared lists, …) will be deleted with it. This action cannot be undone!</string>
     <string name="user_already_exists">A user with this info already exists!</string>
+    <string name="no_lists_start_creating">You have no lists.\nStart by creating one!</string>
 </resources>

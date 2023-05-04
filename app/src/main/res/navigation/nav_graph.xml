@@ -20,8 +20,8 @@
         <action
             android:id="@+id/action_LoginFragment_to_HomeFragment"
             app:destination="@id/HomeFragment"
-            app:enterAnim="@anim/slide_left"
-            app:popEnterAnim="@anim/slide_left"
+            app:enterAnim="@anim/slide_down"
+            app:popEnterAnim="@anim/slide_down"
             app:popUpTo="@id/LoginFragment"
             app:popUpToInclusive="true" />
     </fragment>

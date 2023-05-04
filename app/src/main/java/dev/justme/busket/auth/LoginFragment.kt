@@ -55,10 +55,13 @@ class LoginFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val handler = Handler(Looper.getMainLooper())
 
+        setLoadingState(true)
         FeathersSocket.getInstance(requireContext()).tryAuthenticateWithAccessToken({
             handler.post {
                 findNavController().navigate(R.id.action_LoginFragment_to_HomeFragment)
             }
+        }, {
+            setLoadingState(false)
         })
 
         binding.loginEmailInput.doAfterTextChanged {

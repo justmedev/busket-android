@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.text.Editable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,7 +16,6 @@ import dev.justme.busket.databinding.FragmentRegisterBinding
 import dev.justme.busket.feathers.FeathersService
 import dev.justme.busket.feathers.FeathersSocket
 import org.json.JSONObject
-import java.util.UUID
 
 /**
  * A simple [Fragment] subclass as the second destination in the navigation.
@@ -50,9 +48,8 @@ class RegisterFragment : Fragment() {
                 )
             ) {
                 if (context == null) return@setOnClickListener
+                setButtonsEnabled(false)
 
-                binding.registerRegisterButton.isEnabled = false
-                binding.registerLoginButton.isEnabled = false
                 val feathers = FeathersSocket.getInstance(requireContext())
 
                 val obj = mapOf(
@@ -65,6 +62,7 @@ class RegisterFragment : Fragment() {
                     if (err != null) {
                         mainThread.post {
                             Snackbar.make(binding.root, R.string.user_already_exists, LENGTH_LONG).show()
+                            setButtonsEnabled(true)
                         }
                         return@create
                     }
@@ -80,6 +78,11 @@ class RegisterFragment : Fragment() {
         binding.registerLoginButton.setOnClickListener {
             findNavController().popBackStack()
         }
+    }
+
+    private fun setButtonsEnabled(enabled: Boolean) {
+        binding.registerRegisterButton.isEnabled = enabled
+        binding.registerLoginButton.isEnabled = enabled
     }
 
     private fun validateInput(name: Editable?, email: Editable?, password: Editable?): Boolean {

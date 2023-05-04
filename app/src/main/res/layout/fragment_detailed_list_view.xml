@@ -10,22 +10,20 @@
     tools:context=".me.list.details.DetailedListView">
 
     <!-- TODO: Update blank fragment layout -->
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <LinearLayout
         android:id="@+id/listContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="visible"
-        app:layout_constraintTop_toTopOf="parent">
-
+        app:layout_constraintTop_toTopOf="parent"
+        android:orientation="vertical">
 
         <LinearLayout
+            android:layout_marginVertical="@dimen/vertical_space_small"
             android:id="@+id/addItemContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent">
+            android:orientation="horizontal">
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/detailedListTextInputLayout"
@@ -40,10 +38,10 @@
                 app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:imeOptions="actionDone"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/add_item"
+                    android:imeOptions="actionDone"
                     android:inputType="text"
                     android:lines="1"
                     android:maxLines="1" />
@@ -58,62 +56,61 @@
                 android:text="@string/add" />
         </LinearLayout>
 
-        <TextView
-            android:layout_marginTop="@dimen/vertical_space_small"
-            android:id="@+id/todoListTitle"
-            style="@style/MaterialAlertDialog.Material3.Title.Text"
+        <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/todo"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/addItemContainer" />
+            android:layout_height="match_parent">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/todoList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="LinearLayoutManager"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/todoListTitle" />
-
-        <LinearLayout
-            android:id="@+id/doneListTitleContainer"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/todoList"
-            android:layout_marginTop="@dimen/vertical_space_small"
-            android:orientation="horizontal">
-            <TextView
-                style="@style/MaterialAlertDialog.Material3.Title.Text"
-                android:layout_width="0dp"
-                android:layout_weight="1"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/done" />
+                android:orientation="vertical">
 
-            <Button
-                android:id="@+id/clearBtn"
-                style="@style/Widget.Material3.Button.OutlinedButton"
-                android:text="@string/clear"
-                android:layout_width="60dp"
-                android:paddingHorizontal="0dp"
-                android:layout_height="40dp"
-                android:layout_gravity="end"/>
-        </LinearLayout>
+                <TextView
+                    android:id="@+id/todoListTitle"
+                    style="@style/MaterialAlertDialog.Material3.Title.Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/vertical_space_small"
+                    android:text="@string/todo" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/doneList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:layoutManager="LinearLayoutManager"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/doneListTitleContainer" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/todoList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="LinearLayoutManager" />
+
+                <LinearLayout
+                    android:id="@+id/doneListTitleContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/vertical_space_small"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/MaterialAlertDialog.Material3.Title.Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/done" />
+
+                    <Button
+                        android:id="@+id/clearBtn"
+                        style="@style/Widget.Material3.Button.OutlinedButton"
+                        android:layout_width="60dp"
+                        android:layout_height="40dp"
+                        android:layout_gravity="end"
+                        android:paddingHorizontal="0dp"
+                        android:text="@string/clear" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/doneList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:layoutManager="LinearLayoutManager" />
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+    </LinearLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/listLoader"

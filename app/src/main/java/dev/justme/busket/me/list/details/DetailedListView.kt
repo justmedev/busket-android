@@ -44,6 +44,11 @@ abstract class ListDetailsMenuProvider : MenuProvider {
     open lateinit var menu: Menu
 }
 
+class ShoppingListAdapter {
+    lateinit var todo: ListDetailsAdapter
+    lateinit var done: ListDetailsAdapter
+}
+
 class DetailedListView : Fragment() {
     private var _binding: FragmentDetailedListViewBinding? = null
     private val binding get() = _binding!!
@@ -53,6 +58,8 @@ class DetailedListView : Fragment() {
 
     private var listId: String? = null
     private var list: ShoppingList? = null
+    private val shoppingListAdapter = ShoppingListAdapter()
+
     private lateinit var feathers: FeathersSocket
     private lateinit var syncListDetailsManager: SyncListDetailsManager
     private lateinit var itemTouchHelper: ItemTouchHelper
@@ -135,16 +142,19 @@ class DetailedListView : Fragment() {
         binding.clearBtn.setOnClickListener {
             clearDone()
         }
-        val adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, permissions, object : StartDragListener {
+
+        shoppingListAdapter.todo = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, true, permissions, object : StartDragListener {
             override fun requestDrag(viewHolder: RecyclerView.ViewHolder) {
                 itemTouchHelper.startDrag(viewHolder)
             }
         })
-        itemTouchHelper = ItemTouchHelper(ItemMoveCallback(adapter))
+        itemTouchHelper = ItemTouchHelper(ItemMoveCallback(shoppingListAdapter.todo))
         itemTouchHelper.attachToRecyclerView(binding.todoList)
-        binding.todoList.adapter = adapter
+        binding.todoList.adapter = shoppingListAdapter.todo
 
-        binding.doneList.adapter = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false, permissions)
+        shoppingListAdapter.done = ListDetailsAdapter(mutableListOf(), ::onItemMoved, ::onItemCheckStateChange, ::onItemLongPress, false, permissions)
+        binding.doneList.adapter = shoppingListAdapter.done
+
         loadListFromRemote {
             if (list == null) throw Exception("list should not be able to be null here!")
             loadWhitelistedUserFromRemote(::updatePermissions)

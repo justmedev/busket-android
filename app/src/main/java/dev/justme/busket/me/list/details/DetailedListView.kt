@@ -85,9 +85,7 @@ class DetailedListView : Fragment() {
             if (arr.length() <= 0) return@find // TODO TRIGGER NOT FOUND
 
             list = ShoppingList.fromJSONObject(arr.getJSONObject(0))
-            handler.post {
-                cb.invoke()
-            }
+            handler.post(cb)
         }
     }
 
@@ -167,9 +165,9 @@ class DetailedListView : Fragment() {
                 {
                     val entry = findEntryGlobalById(it.eventData.entryId)
                     if (entry.list == ListType.TODO) {
-                        (binding.todoList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
+                        shoppingListAdapter.todo.onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
                     } else {
-                        (binding.doneList.adapter as ListDetailsAdapter).onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
+                        shoppingListAdapter.done.onRowMoved(it.eventData.state.oldIndex ?: -1, it.eventData.state.newIndex ?: -1, false)
                     }
                 },
                 {
@@ -189,12 +187,12 @@ class DetailedListView : Fragment() {
 
             val entries = list!!.entries.toMutableList()
             for (entry in entries) {
-                (binding.todoList.adapter as ListDetailsAdapter).entries.add(ListDetailsRecyclerEntry(false, entry.name, entry.id))
+                shoppingListAdapter.todo.entries.add(ListDetailsRecyclerEntry(false, entry.name, entry.id))
             }
 
             val checkedEntries = list!!.checkedEntries.toMutableList()
             for (entry in checkedEntries) {
-                (binding.doneList.adapter as ListDetailsAdapter).entries.add(ListDetailsRecyclerEntry(true, entry.name, entry.id))
+                shoppingListAdapter.done.entries.add(ListDetailsRecyclerEntry(true, entry.name, entry.id))
             }
 
             (requireActivity() as MainActivity).supportActionBar?.title = list?.name
@@ -225,10 +223,10 @@ class DetailedListView : Fragment() {
 
     private fun updatePermissions() {
         Log.d(javaClass.simpleName, "updatePermissions: canEditEntries ${permissions.canEditEntries}; canDeleteEntries ${permissions.canDeleteEntries}")
-        (binding.todoList.adapter as ListDetailsAdapter).permissions = permissions
-        (binding.doneList.adapter as ListDetailsAdapter).permissions = permissions
-        (binding.todoList.adapter as ListDetailsAdapter).notifyItemRangeChanged(0, (binding.todoList.adapter as ListDetailsAdapter).entries.size)
-        (binding.doneList.adapter as ListDetailsAdapter).notifyItemRangeChanged(0, (binding.doneList.adapter as ListDetailsAdapter).entries.size)
+        shoppingListAdapter.todo.permissions = permissions
+        shoppingListAdapter.done.permissions = permissions
+        shoppingListAdapter.todo.notifyItemRangeChanged(0, shoppingListAdapter.todo.entries.size)
+        shoppingListAdapter.done.notifyItemRangeChanged(0, shoppingListAdapter.done.entries.size)
 
         val editVisibility = if (permissions.canEditEntries) View.VISIBLE else View.GONE
 
@@ -239,11 +237,11 @@ class DetailedListView : Fragment() {
 
     // region handle list events
     private fun findEntryGlobalById(entryId: String): FoundEntry {
-        val todoListIndex = (binding.todoList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entryId }
+        val todoListIndex = shoppingListAdapter.todo.entries.indexOfFirst { it.id == entryId }
         if (todoListIndex != -1) return FoundEntry(todoListIndex, ListType.TODO)
 
 
-        val doneListIndex = (binding.doneList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entryId }
+        val doneListIndex = shoppingListAdapter.done.entries.indexOfFirst { it.id == entryId }
         if (doneListIndex != -1) return FoundEntry(doneListIndex, ListType.DONE)
 
         throw EntryNotFound(entryId)
@@ -278,11 +276,11 @@ class DetailedListView : Fragment() {
         val found = findEntryGlobalById(entryId)
 
         if (found.list == ListType.TODO) {
-            (binding.todoList.adapter as ListDetailsAdapter).entries[found.index].name = newName
-            (binding.todoList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
+            shoppingListAdapter.todo.entries[found.index].name = newName
+            shoppingListAdapter.todo.notifyItemChanged(found.index)
         } else {
-            (binding.doneList.adapter as ListDetailsAdapter).entries[found.index].name = newName
-            (binding.doneList.adapter as ListDetailsAdapter).notifyItemChanged(found.index)
+            shoppingListAdapter.done.entries[found.index].name = newName
+            shoppingListAdapter.done.notifyItemChanged(found.index)
         }
 
         if (recordEvent) {
@@ -295,14 +293,14 @@ class DetailedListView : Fragment() {
         val found = findEntryGlobalById(entryId)
 
         if (found.list == ListType.TODO) {
-            (binding.todoList.adapter as ListDetailsAdapter).entries.removeAt(found.index)
-            (binding.todoList.adapter as ListDetailsAdapter).notifyItemRemoved(found.index)
+            shoppingListAdapter.todo.entries.removeAt(found.index)
+            shoppingListAdapter.todo.notifyItemRemoved(found.index)
 
             return
         }
 
-        (binding.doneList.adapter as ListDetailsAdapter).entries.removeAt(found.index)
-        (binding.doneList.adapter as ListDetailsAdapter).notifyItemRemoved(found.index)
+        shoppingListAdapter.done.entries.removeAt(found.index)
+        shoppingListAdapter.done.notifyItemRemoved(found.index)
     }
 
     private fun clearDone() {
@@ -311,9 +309,9 @@ class DetailedListView : Fragment() {
 
     @SuppressLint("NotifyDataSetChanged")
     private fun clearDone(recordEvent: Boolean) {
-        val clearedEntries = (binding.doneList.adapter as ListDetailsAdapter).entries.toMutableList()
-        (binding.doneList.adapter as ListDetailsAdapter).entries.clear()
-        (binding.doneList.adapter as ListDetailsAdapter).notifyDataSetChanged()
+        val clearedEntries = shoppingListAdapter.done.entries.toMutableList()
+        shoppingListAdapter.done.entries.clear()
+        shoppingListAdapter.done.notifyDataSetChanged()
 
         if (!recordEvent) return
         for (entry in clearedEntries) {
@@ -332,8 +330,8 @@ class DetailedListView : Fragment() {
 
     private fun createEntry(name: String, id: String, recordEvent: Boolean) {
         val entry = ListDetailsRecyclerEntry(false, name, id)
-        (binding.todoList.adapter as ListDetailsAdapter).entries.add(0, entry)
-        (binding.todoList.adapter as ListDetailsAdapter).notifyItemInserted(0)
+        shoppingListAdapter.todo.entries.add(0, entry)
+        shoppingListAdapter.todo.notifyItemInserted(0)
 
         if (recordEvent) {
             val state = ShoppingListEventState(entry.name, null, null)
@@ -359,19 +357,19 @@ class DetailedListView : Fragment() {
         }
 
         if (entry.checked) {
-            val index = (binding.todoList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entry.id }
-            (binding.todoList.adapter as ListDetailsAdapter).entries.removeAt(index)
-            (binding.todoList.adapter as ListDetailsAdapter).notifyItemRemoved(index)
+            val index = shoppingListAdapter.todo.entries.indexOfFirst { it.id == entry.id }
+            shoppingListAdapter.todo.entries.removeAt(index)
+            shoppingListAdapter.todo.notifyItemRemoved(index)
 
-            (binding.doneList.adapter as ListDetailsAdapter).entries.add(0, entry)
-            (binding.doneList.adapter as ListDetailsAdapter).notifyItemInserted(0)
+            shoppingListAdapter.done.entries.add(0, entry)
+            shoppingListAdapter.done.notifyItemInserted(0)
         } else {
-            val index = (binding.doneList.adapter as ListDetailsAdapter).entries.indexOfFirst { it.id == entry.id }
-            (binding.doneList.adapter as ListDetailsAdapter).entries.removeAt(index)
-            (binding.doneList.adapter as ListDetailsAdapter).notifyItemRemoved(index)
+            val index = shoppingListAdapter.done.entries.indexOfFirst { it.id == entry.id }
+            shoppingListAdapter.done.entries.removeAt(index)
+            shoppingListAdapter.done.notifyItemRemoved(index)
 
-            (binding.todoList.adapter as ListDetailsAdapter).entries.add(0, entry)
-            (binding.todoList.adapter as ListDetailsAdapter).notifyItemInserted(0)
+            shoppingListAdapter.todo.entries.add(0, entry)
+            shoppingListAdapter.todo.notifyItemInserted(0)
         }
     }
     // endregion
